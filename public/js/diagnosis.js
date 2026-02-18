@@ -114,6 +114,44 @@ function clearProgress() {
 }
 
 // ========================================
+// API呼び出し（失敗時はサイレントに継続）
+// ========================================
+async function apiCreateSession() {
+  try {
+    const res = await fetch('/api/sessions', { method: 'POST' });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.session_id || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function apiUpdateSession(sessionId, updates) {
+  if (!sessionId) return;
+  try {
+    await fetch('/api/sessions/' + sessionId, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    });
+  } catch (e) {
+    // サイレントに無視
+  }
+}
+
+async function apiGetSession(sessionId) {
+  if (!sessionId) return null;
+  try {
+    const res = await fetch('/api/sessions/' + sessionId);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+// ========================================
 // 画面切り替え
 // ========================================
 function showScreen(screenId) {
@@ -250,6 +288,8 @@ function goToBlock(blockNum) {
   if (progress) {
     progress.max_block = Math.max(progress.max_block, blockNum);
     saveProgress(progress);
+    // API更新（失敗しても続行）
+    apiUpdateSession(progress.session_id, { max_block: progress.max_block });
   }
   showScreen('screen-block' + blockNum);
 }
@@ -270,23 +310,57 @@ function submitBlock(blockNum) {
   if (blockNum < TOTAL_BLOCKS) {
     goToBlock(blockNum + 1);
   } else {
-    // Block5 完了 → 結果画面
+    // Block5 完了 → 氏名入力画面
     var progress = loadProgress();
     if (progress) {
       progress.max_block = TOTAL_BLOCKS;
-      progress.completed = true;
+      progress.questions_done = true;
       saveProgress(progress);
+      apiUpdateSession(progress.session_id, { max_block: TOTAL_BLOCKS });
     }
-    showScreen('screen-result');
+    showScreen('screen-userinfo');
   }
+}
+
+// ========================================
+// 氏名送信
+// ========================================
+async function submitUserInfo() {
+  var nameInput = document.getElementById('input-name');
+  var errorEl  = document.getElementById('userinfo-error');
+  var name = nameInput ? nameInput.value.trim() : '';
+
+  if (!name) {
+    nameInput.classList.add('error');
+    errorEl.textContent = '氏名を入力してください。';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  nameInput.classList.remove('error');
+  errorEl.style.display = 'none';
+
+  var progress = loadProgress();
+  if (progress) {
+    progress.completed = true;
+    progress.name = name;
+    saveProgress(progress);
+    // API更新（completed=true, name保存）
+    apiUpdateSession(progress.session_id, { completed: true, name: name });
+  }
+
+  showScreen('screen-result');
 }
 
 // ========================================
 // 診断開始
 // ========================================
-function startDiagnosis() {
+async function startDiagnosis() {
+  // APIでセッションを作成し、session_idを取得（失敗時はローカルUUIDを使用）
+  var apiSessionId = await apiCreateSession();
+
   var progress = {
-    session_id: generateUUID(),
+    session_id: apiSessionId || generateUUID(),
     max_block:  1,
     completed:  false,
   };
@@ -314,7 +388,7 @@ function restartDiagnosis() {
 // ========================================
 // 初期化
 // ========================================
-function init() {
+async function init() {
   var progress = loadProgress();
 
   if (!progress) {
@@ -323,9 +397,23 @@ function init() {
     return;
   }
 
+  // サーバー側の状態で上書き（APIが使えない場合はlocalStorageのまま）
+  var serverState = await apiGetSession(progress.session_id);
+  if (serverState) {
+    progress.max_block = serverState.max_block;
+    progress.completed = serverState.completed;
+    saveProgress(progress);
+  }
+
   if (progress.completed) {
-    // 完走済み → 結果画面
+    // 完走済み（氏名入力済み）→ 結果画面
     showScreen('screen-result');
+    return;
+  }
+
+  if (progress.questions_done) {
+    // 50問完了・氏名未入力 → 氏名入力画面
+    showScreen('screen-userinfo');
     return;
   }
 
@@ -360,6 +448,22 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       }
     })(i);
+  }
+
+  // 氏名送信ボタン
+  var btnUserInfo = document.getElementById('btn-submit-userinfo');
+  if (btnUserInfo) {
+    btnUserInfo.addEventListener('click', submitUserInfo);
+  }
+
+  // 氏名入力フィールドのエラー解除
+  var inputName = document.getElementById('input-name');
+  if (inputName) {
+    inputName.addEventListener('input', function () {
+      inputName.classList.remove('error');
+      var errorEl = document.getElementById('userinfo-error');
+      if (errorEl) errorEl.style.display = 'none';
+    });
   }
 
   // 初期化

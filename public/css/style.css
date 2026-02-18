@@ -433,6 +433,78 @@ body {
   margin-bottom: 16px;
 }
 
+/* ---------- USER INFO SCREEN ---------- */
+#screen-userinfo {
+  background: linear-gradient(160deg, #EFF6FF 0%, #DBEAFE 60%, #BFDBFE 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#screen-userinfo.active {
+  display: flex;
+}
+
+.userinfo-inner {
+  padding: 48px 24px 48px;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+}
+
+.userinfo-title {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--color-text);
+  margin-bottom: 12px;
+}
+
+.userinfo-desc {
+  font-size: 13px;
+  color: var(--color-text-sub);
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.userinfo-form {
+  text-align: left;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--transition);
+  -webkit-appearance: none;
+}
+
+.form-input:focus {
+  border-color: var(--color-accent);
+}
+
+.form-input.error {
+  border-color: var(--color-error);
+}
+
 /* ---------- VALIDATION ERROR ---------- */
 .validation-msg {
   background-color: #FEF2F2;
