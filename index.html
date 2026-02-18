@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>適職診断 | MUSUBU</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ===== START SCREEN ===== -->
+  <div id="screen-start" class="screen">
+    <div class="start-inner">
+      <div class="logo">MUSUBU</div>
+      <h1 class="start-title">あなたに合った仕事、<br>見つけてみませんか？</h1>
+      <p class="start-desc">
+        全50問・約5分の診断で<br>
+        あなたの「適職タイプ」がわかります。
+      </p>
+      <ul class="start-features">
+        <li>✓ 全5ブロック・各10問</li>
+        <li>✓ 途中で中断しても再開OK</li>
+        <li>✓ 診断後にLINEで詳細を確認</li>
+      </ul>
+      <button id="btn-start" class="btn btn-primary btn-large">診断をはじめる</button>
+    </div>
+  </div>
+
+  <!-- ===== BLOCK 1 ===== -->
+  <div id="screen-block1" class="screen">
+    <header class="block-header">
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span class="progress-block">Block <strong>1</strong> / 5</span>
+          <span class="progress-range">Q1〜Q10</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width: 20%"></div>
+        </div>
+      </div>
+    </header>
+    <div class="questions-container" id="questions-block1"></div>
+    <div class="block-footer">
+      <button id="btn-next-block1" class="btn btn-primary">次のブロックへ</button>
+    </div>
+  </div>
+
+  <!-- ===== BLOCK 2 ===== -->
+  <div id="screen-block2" class="screen">
+    <header class="block-header">
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span class="progress-block">Block <strong>2</strong> / 5</span>
+          <span class="progress-range">Q11〜Q20</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width: 40%"></div>
+        </div>
+      </div>
+    </header>
+    <div class="questions-container" id="questions-block2"></div>
+    <div class="block-footer">
+      <button id="btn-next-block2" class="btn btn-primary">次のブロックへ</button>
+    </div>
+  </div>
+
+  <!-- ===== BLOCK 3 ===== -->
+  <div id="screen-block3" class="screen">
+    <header class="block-header">
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span class="progress-block">Block <strong>3</strong> / 5</span>
+          <span class="progress-range">Q21〜Q30</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width: 60%"></div>
+        </div>
+      </div>
+    </header>
+    <div class="questions-container" id="questions-block3"></div>
+    <div class="block-footer">
+      <button id="btn-next-block3" class="btn btn-primary">次のブロックへ</button>
+    </div>
+  </div>
+
+  <!-- ===== BLOCK 4 ===== -->
+  <div id="screen-block4" class="screen">
+    <header class="block-header">
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span class="progress-block">Block <strong>4</strong> / 5</span>
+          <span class="progress-range">Q31〜Q40</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width: 80%"></div>
+        </div>
+      </div>
+    </header>
+    <div class="questions-container" id="questions-block4"></div>
+    <div class="block-footer">
+      <button id="btn-next-block4" class="btn btn-primary">次のブロックへ</button>
+    </div>
+  </div>
+
+  <!-- ===== BLOCK 5 ===== -->
+  <div id="screen-block5" class="screen">
+    <header class="block-header">
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span class="progress-block">Block <strong>5</strong> / 5</span>
+          <span class="progress-range">Q41〜Q50</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width: 100%"></div>
+        </div>
+      </div>
+    </header>
+    <div class="questions-container" id="questions-block5"></div>
+    <div class="block-footer">
+      <button id="btn-next-block5" class="btn btn-primary">診断結果を見る</button>
+    </div>
+  </div>
+
+  <!-- ===== RESULT SCREEN ===== -->
+  <div id="screen-result" class="screen">
+    <div class="result-inner">
+      <div class="result-badge">診断完了</div>
+      <h2 class="result-title">あなたは</h2>
+      <div class="result-type">チャレンジャータイプ</div>
+      <p class="result-desc">
+        あなたは困難な状況でも諦めず、新しいことへの挑戦を楽しめるタイプです。
+        変化の多い環境でこそ力を発揮し、周囲を巻き込みながら目標を達成していきます。
+      </p>
+      <div class="result-traits">
+        <div class="trait-item">
+          <span class="trait-icon">💡</span>
+          <span>アイデア発想力が高い</span>
+        </div>
+        <div class="trait-item">
+          <span class="trait-icon">🔥</span>
+          <span>困難を乗り越える強さがある</span>
+        </div>
+        <div class="trait-item">
+          <span class="trait-icon">🚀</span>
+          <span>変化する環境に強い</span>
+        </div>
+      </div>
+      <div class="result-cta">
+        <p class="result-cta-text">
+          あなたのタイプに合った具体的な職種や<br>キャリアプランをLINEでお伝えします！
+        </p>
+        <a href="#line-register" class="btn btn-line btn-large">
+          <span class="line-icon">LINE</span>
+          LINEで詳細を受け取る
+        </a>
+      </div>
+      <button id="btn-restart" class="btn btn-secondary">もう一度診断する</button>
+    </div>
+  </div>
+
+  <script src="js/diagnosis.js"></script>
+</body>
+</html>
