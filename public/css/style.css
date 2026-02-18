@@ -345,84 +345,197 @@ body {
 
 /* ---------- RESULT SCREEN ---------- */
 #screen-result {
-  background: linear-gradient(160deg, #EFF6FF 0%, #F9FAFB 60%);
+  background: var(--color-bg);
 }
 
 #screen-result.active {
   display: block;
 }
 
-.result-inner {
-  padding: 40px 20px 60px;
+/* ---- Hero ---- */
+.result-hero {
+  padding: 44px 24px 40px;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+}
+
+.result-hero-inner {
   max-width: 480px;
   margin: 0 auto;
-  text-align: center;
 }
 
-.result-badge {
+.result-badge-white {
   display: inline-block;
-  background-color: #DBEAFE;
-  color: var(--color-accent);
-  font-size: 12px;
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   padding: 4px 14px;
   border-radius: 999px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
-.result-title {
-  font-size: 18px;
-  color: var(--color-text-sub);
-  margin-bottom: 4px;
-  font-weight: 400;
+.result-emoji {
+  font-size: 72px;
+  line-height: 1;
+  margin-bottom: 8px;
+  animation: bounceIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
 }
 
-.result-type {
-  font-size: 32px;
-  font-weight: 900;
-  color: var(--color-accent);
-  margin-bottom: 20px;
-  line-height: 1.2;
+@keyframes bounceIn {
+  0%   { transform: scale(0.2); opacity: 0; }
+  60%  { transform: scale(1.15); }
+  80%  { transform: scale(0.95); }
+  100% { transform: scale(1);   opacity: 1; }
 }
 
-.result-desc {
+.result-title-label {
   font-size: 15px;
-  line-height: 1.8;
-  color: var(--color-text);
-  margin-bottom: 28px;
-  text-align: left;
+  opacity: 0.85;
+  margin-bottom: 4px;
 }
 
-.result-traits {
-  background-color: var(--color-surface);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  margin-bottom: 32px;
+.result-type-name {
+  font-size: 34px;
+  font-weight: 900;
+  margin-bottom: 12px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.result-tagline {
+  display: inline-block;
+  font-size: 13px;
+  background: rgba(255,255,255,0.2);
+  padding: 5px 18px;
+  border-radius: 999px;
+  opacity: 0.95;
+}
+
+/* ---- Body ---- */
+.result-body {
+  padding: 20px 16px 60px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.result-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
   border: 1px solid var(--color-border);
 }
 
-.trait-item {
+.result-card-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-sub);
+  margin-bottom: 16px;
+}
+
+/* ---- Axis Map ---- */
+.axis-map-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ---- Score Bars ---- */
+.score-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 0;
-  font-size: 14px;
-  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.score-item:last-child {
+  margin-bottom: 0;
+}
+
+.score-label {
+  width: 88px;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--color-text);
-  text-align: left;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
-.trait-item + .trait-item {
-  border-top: 1px solid var(--color-border);
+.score-track {
+  flex: 1;
+  height: 10px;
+  background: var(--color-progress-bg);
+  border-radius: 999px;
+  overflow: hidden;
 }
 
-.trait-icon {
-  font-size: 20px;
+.score-fill {
+  height: 100%;
+  border-radius: 999px;
+  width: 0;
+  transition: width 0.8s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+.score-value {
+  width: 30px;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: right;
+  flex-shrink: 0;
+  color: var(--color-text-sub);
+}
+
+.score-item.is-top .score-label {
+  color: var(--color-accent);
+}
+
+.score-item.is-top .score-value {
+  color: var(--color-accent);
+}
+
+/* ---- Description ---- */
+.result-desc-text {
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--color-text);
+  margin-bottom: 20px;
+}
+
+/* ---- Traits Grid ---- */
+.result-traits-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.trait-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--color-bg);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.trait-chip-icon {
+  font-size: 22px;
   flex-shrink: 0;
 }
 
-.result-cta {
+/* ---- CTA ---- */
+.result-cta-wrap {
+  text-align: center;
   margin-bottom: 16px;
 }
 

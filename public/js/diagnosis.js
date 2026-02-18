@@ -97,38 +97,62 @@ const RESULT_TYPES = {
   leader: {
     label: 'リーダータイプ',
     icon: '👑',
+    tagline: '人を動かし、未来を切り拓く',
+    gradient: 'linear-gradient(135deg, #FF6B35 0%, #F7C948 100%)',
+    color: '#FF6B35',
     desc: '人を巻き込み、チームを引っ張っていくことに喜びを感じるタイプです。責任感が強く、周囲に影響を与えながら目標を達成することを得意とします。競争環境の中でも臆せず、積極的に前に出る行動力があります。',
     traits: ['決断力がある', '人を動かすのが得意', '責任感が強い'],
+    mapX: 78, mapY: 82,
   },
   supporter: {
     label: 'サポータータイプ',
     icon: '🤝',
+    tagline: '人の力を引き出す、縁の下の力持ち',
+    gradient: 'linear-gradient(135deg, #06C755 0%, #4ECDC4 100%)',
+    color: '#06C755',
     desc: '人の気持ちに寄り添い、チームや組織を内側から支えることに長けたタイプです。共感力が高く、周囲の人が安心して力を発揮できる環境をつくることを得意とします。縁の下の力持ちとして、チーム全体の成果を底上げします。',
     traits: ['共感力が高い', '人の話をよく聞く', 'チームを陰で支える'],
+    mapX: 72, mapY: 210,
   },
   analyst: {
     label: 'アナリストタイプ',
     icon: '🔍',
+    tagline: 'データと論理で、最適解を導く',
+    gradient: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
+    color: '#3B82F6',
     desc: 'データや論理を基に物事を深く考察し、正確な判断を下すことを得意とするタイプです。感情より事実を重視し、細部まで丁寧に分析するプロセスに充実感を覚えます。複雑な問題ほど本領を発揮します。',
     traits: ['論理的思考が得意', '細部への注意力が高い', 'データに基づいて判断できる'],
+    mapX: 198, mapY: 205,
   },
   creator: {
     label: 'クリエイタータイプ',
     icon: '🎨',
+    tagline: '発想力と表現力で、新しい世界をつくる',
+    gradient: 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)',
+    color: '#8B5CF6',
     desc: '新しいアイデアを生み出し、それを独自の形で表現することに情熱を持つタイプです。既存の枠にとらわれず、遊び心と発想力を武器に新しい価値を創造します。自分のビジョンを形にするプロセス自体を楽しめます。',
     traits: ['発想力が豊か', '型破りな発想ができる', '表現することが好き'],
+    mapX: 205, mapY: 82,
   },
   specialist: {
     label: 'スペシャリストタイプ',
     icon: '🎯',
+    tagline: 'ひとつの道を深く極める、本物のプロ',
+    gradient: 'linear-gradient(135deg, #0F172A 0%, #1E40AF 100%)',
+    color: '#1E40AF',
     desc: '一つの分野を深く極めることに強いこだわりと誇りを持つタイプです。コツコツと積み上げる努力を惜しまず、高い専門性をもって質の高いアウトプットを追求します。長期的な視点で自分のスキルを磨き続けます。',
     traits: ['専門性へのこだわりが強い', '継続力・忍耐力がある', '品質にこだわる完璧主義'],
+    mapX: 238, mapY: 178,
   },
   challenger: {
     label: 'チャレンジャータイプ',
     icon: '🚀',
+    tagline: '変化を味方に、どこまでも前へ',
+    gradient: 'linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%)',
+    color: '#06B6D4',
     desc: '変化や刺激を好み、新しい環境・経験に積極的に飛び込んでいくタイプです。現状維持よりも挑戦を選び、失敗を恐れずにどんどん前に進む行動力があります。多様な分野への好奇心を原動力に、幅広く活躍できます。',
     traits: ['変化への適応力が高い', '好奇心旺盛', '行動が速い'],
+    mapX: 142, mapY: 58,
   },
 };
 
@@ -388,37 +412,145 @@ function getAnswers() {
   return answers;
 }
 
-function calculateType(answers) {
-  var best = null;
-  var bestScore = -1;
-
+function calculateScores(answers) {
+  var scores = {};
   Object.keys(TYPE_MAP).forEach(function (type) {
     var qids = TYPE_MAP[type];
     var total = qids.reduce(function (sum, qid) { return sum + (answers[qid] || 0); }, 0);
-    var avg = total / qids.length;
-    if (avg > bestScore) {
-      bestScore = avg;
+    scores[type] = Math.round((total / qids.length) * 10) / 10;
+  });
+  return scores;
+}
+
+function calculateType(scores) {
+  var best = null;
+  var bestScore = -1;
+  Object.keys(scores).forEach(function (type) {
+    if (scores[type] > bestScore) {
+      bestScore = scores[type];
       best = type;
     }
   });
-
   return best || 'challenger';
 }
 
-function renderResult(typeKey) {
+// ========================================
+// 結果レンダリング
+// ========================================
+function buildMapSVG(activeKey) {
+  var W = 280, H = 260;
+  var cx = 140, cy = 130;
+
+  var lines = [
+    // 背景
+    '<rect width="' + W + '" height="' + H + '" rx="12" fill="#F8FAFC"/>',
+    // 象限の薄い色
+    '<rect x="36" y="26" width="104" height="104" rx="6" fill="#FFF7ED" opacity="0.7"/>',
+    '<rect x="140" y="26" width="104" height="104" rx="6" fill="#F5F3FF" opacity="0.7"/>',
+    '<rect x="36" y="130" width="104" height="104" rx="6" fill="#F0FDF4" opacity="0.7"/>',
+    '<rect x="140" y="130" width="104" height="104" rx="6" fill="#EFF6FF" opacity="0.7"/>',
+    // 軸
+    '<line x1="140" y1="16" x2="140" y2="244" stroke="#CBD5E1" stroke-width="1.5"/>',
+    '<line x1="26" y1="130" x2="254" y2="130" stroke="#CBD5E1" stroke-width="1.5"/>',
+    // 軸ラベル
+    '<text x="140" y="11" text-anchor="middle" font-size="9" fill="#94A3B8" font-weight="600">変化志向</text>',
+    '<text x="140" y="255" text-anchor="middle" font-size="9" fill="#94A3B8" font-weight="600">安定志向</text>',
+    '<text x="22" y="133" text-anchor="middle" font-size="9" fill="#94A3B8" font-weight="600">人</text>',
+    '<text x="258" y="133" text-anchor="middle" font-size="9" fill="#94A3B8" font-weight="600">課題</text>',
+  ];
+
+  // 非アクティブタイプのドット
+  Object.keys(RESULT_TYPES).forEach(function (key) {
+    if (key === activeKey) return;
+    var t = RESULT_TYPES[key];
+    lines.push(
+      '<circle cx="' + t.mapX + '" cy="' + t.mapY + '" r="14" fill="' + t.color + '" opacity="0.15"/>',
+      '<circle cx="' + t.mapX + '" cy="' + t.mapY + '" r="8" fill="' + t.color + '" opacity="0.35"/>',
+      '<text x="' + t.mapX + '" y="' + (t.mapY + 22) + '" text-anchor="middle" font-size="8" fill="' + t.color + '" font-weight="600">' + t.label.replace('タイプ', '') + '</text>'
+    );
+  });
+
+  // アクティブタイプのドット（パルス付き）
+  var a = RESULT_TYPES[activeKey];
+  lines.push(
+    '<circle cx="' + a.mapX + '" cy="' + a.mapY + '" r="24" fill="' + a.color + '" opacity="0.15"><animate attributeName="r" values="20;28;20" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.2;0.05;0.2" dur="2s" repeatCount="indefinite"/></circle>',
+    '<circle cx="' + a.mapX + '" cy="' + a.mapY + '" r="16" fill="' + a.color + '"/>',
+    '<text x="' + a.mapX + '" y="' + (a.mapY + 5) + '" text-anchor="middle" font-size="11" fill="#fff" font-weight="900">★</text>',
+    '<text x="' + a.mapX + '" y="' + (a.mapY + 28) + '" text-anchor="middle" font-size="9" fill="' + a.color + '" font-weight="700">あなた</text>'
+  );
+
+  return '<svg class="axis-map-svg" viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">'
+    + lines.join('') + '</svg>';
+}
+
+function buildScoreBars(scores, topKey) {
+  var order = ['leader', 'challenger', 'creator', 'supporter', 'analyst', 'specialist'];
+  return order.map(function (key) {
+    var t = RESULT_TYPES[key];
+    var pct = Math.round((scores[key] / 5) * 100);
+    var isTop = key === topKey;
+    return '<div class="score-item' + (isTop ? ' is-top' : '') + '">'
+      + '<div class="score-label"><span>' + t.icon + '</span>' + t.label.replace('タイプ', '') + '</div>'
+      + '<div class="score-track"><div class="score-fill" data-target="' + pct + '%" style="background:' + t.color + ';"></div></div>'
+      + '<div class="score-value">' + scores[key].toFixed(1) + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function renderResult(typeKey, scores) {
   var type = RESULT_TYPES[typeKey];
   if (!type) return;
 
-  var nameEl   = document.getElementById('result-type-name');
-  var descEl   = document.getElementById('result-type-desc');
-  var traitsEl = document.getElementById('result-type-traits');
+  // Hero
+  var heroEl = document.getElementById('result-hero');
+  if (heroEl) heroEl.style.background = type.gradient;
 
-  if (nameEl)   nameEl.textContent = type.label;
-  if (descEl)   descEl.textContent = type.desc;
+  var emojiEl = document.getElementById('result-emoji');
+  if (emojiEl) {
+    // アニメーション再トリガー
+    emojiEl.style.animation = 'none';
+    emojiEl.textContent = type.icon;
+    requestAnimationFrame(function () { emojiEl.style.animation = ''; });
+  }
+
+  var nameEl = document.getElementById('result-type-name');
+  if (nameEl) nameEl.textContent = type.label;
+
+  var taglineEl = document.getElementById('result-tagline');
+  if (taglineEl) taglineEl.textContent = type.tagline;
+
+  // 傾向マップ
+  var mapEl = document.getElementById('result-map');
+  if (mapEl) mapEl.innerHTML = buildMapSVG(typeKey);
+
+  // スコアバー（スコアがある場合のみ）
+  var scoresEl = document.getElementById('result-scores');
+  if (scoresEl) {
+    if (scores) {
+      scoresEl.innerHTML = buildScoreBars(scores, typeKey);
+      // バーをアニメーション
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          scoresEl.querySelectorAll('.score-fill').forEach(function (el) {
+            el.style.width = el.dataset.target;
+          });
+        });
+      });
+    } else {
+      scoresEl.closest('.result-card').style.display = 'none';
+    }
+  }
+
+  // 説明文
+  var descEl = document.getElementById('result-type-desc');
+  if (descEl) descEl.textContent = type.desc;
+
+  // 特徴チップ
+  var traitsEl = document.getElementById('result-type-traits');
   if (traitsEl) {
     traitsEl.innerHTML = type.traits.map(function (trait) {
-      return '<div class="trait-item">'
-        + '<span class="trait-icon">' + type.icon + '</span>'
+      return '<div class="trait-chip">'
+        + '<span class="trait-chip-icon">' + type.icon + '</span>'
         + '<span>' + escapeHtml(trait) + '</span>'
         + '</div>';
     }).join('');
@@ -444,16 +576,17 @@ async function submitUserInfo() {
   errorEl.style.display = 'none';
 
   var answers = getAnswers();
-  var typeKey = calculateType(answers);
-  renderResult(typeKey);
+  var scores  = calculateScores(answers);
+  var typeKey = calculateType(scores);
+  renderResult(typeKey, scores);
 
   var progress = loadProgress();
   if (progress) {
-    progress.completed = true;
-    progress.name = name;
-    progress.result_type = typeKey;
+    progress.completed    = true;
+    progress.name         = name;
+    progress.result_type  = typeKey;
+    progress.result_scores = scores;
     saveProgress(progress);
-    // API更新（completed=true, name, result_type保存）
     apiUpdateSession(progress.session_id, { completed: true, name: name, result_type: typeKey });
   }
 
@@ -515,7 +648,7 @@ async function init() {
 
   if (progress.completed) {
     // 完走済み（氏名入力済み）→ 結果画面
-    if (progress.result_type) renderResult(progress.result_type);
+    if (progress.result_type) renderResult(progress.result_type, progress.result_scores || null);
     showScreen('screen-result');
     return;
   }

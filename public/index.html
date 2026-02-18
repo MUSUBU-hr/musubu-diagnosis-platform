@@ -140,13 +140,40 @@
 
   <!-- ===== RESULT SCREEN ===== -->
   <div id="screen-result" class="screen">
-    <div class="result-inner">
-      <div class="result-badge">診断完了</div>
-      <h2 class="result-title">あなたは</h2>
-      <div id="result-type-name" class="result-type"></div>
-      <p id="result-type-desc" class="result-desc"></p>
-      <div id="result-type-traits" class="result-traits"></div>
-      <div class="result-cta">
+    <!-- ヒーロー（タイプカラーで染まる） -->
+    <div class="result-hero" id="result-hero">
+      <div class="result-hero-inner">
+        <div class="result-badge-white">診断完了</div>
+        <div class="result-emoji" id="result-emoji"></div>
+        <p class="result-title-label">あなたは</p>
+        <div class="result-type-name" id="result-type-name"></div>
+        <p class="result-tagline" id="result-tagline"></p>
+      </div>
+    </div>
+
+    <!-- ボディ -->
+    <div class="result-body">
+
+      <!-- 傾向マップ -->
+      <div class="result-card">
+        <div class="result-card-title">傾向マップ</div>
+        <div id="result-map"></div>
+      </div>
+
+      <!-- タイプ別スコア -->
+      <div class="result-card">
+        <div class="result-card-title">タイプ別スコア</div>
+        <div id="result-scores"></div>
+      </div>
+
+      <!-- 説明・特徴 -->
+      <div class="result-card">
+        <p id="result-type-desc" class="result-desc-text"></p>
+        <div id="result-type-traits" class="result-traits-grid"></div>
+      </div>
+
+      <!-- LINE CTA -->
+      <div class="result-cta-wrap">
         <p class="result-cta-text">
           あなたのタイプに合った具体的な職種や<br>キャリアプランをLINEでお伝えします！
         </p>
@@ -155,6 +182,7 @@
           LINEで詳細を受け取る
         </a>
       </div>
+
       <button id="btn-restart" class="btn btn-secondary">もう一度診断する</button>
     </div>
   </div>
