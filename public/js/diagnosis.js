@@ -423,15 +423,13 @@ function calculateScores(answers) {
 }
 
 function calculateType(scores) {
-  var best = null;
-  var bestScore = -1;
-  Object.keys(scores).forEach(function (type) {
-    if (scores[type] > bestScore) {
-      bestScore = scores[type];
-      best = type;
-    }
-  });
-  return best || 'challenger';
+  var sorted = Object.keys(scores).sort(function (a, b) { return scores[b] - scores[a]; });
+  return sorted[0] || 'challenger';
+}
+
+function calculateSubType(scores, mainType) {
+  var sorted = Object.keys(scores).sort(function (a, b) { return scores[b] - scores[a]; });
+  return sorted[1] || 'supporter';
 }
 
 // ========================================
@@ -497,9 +495,19 @@ function buildScoreBars(scores, topKey) {
   }).join('');
 }
 
-function renderResult(typeKey, scores) {
+function renderResult(typeKey, subTypeKey, scores) {
   var type = RESULT_TYPES[typeKey];
   if (!type) return;
+
+  // サブタイプ
+  var subtypeEl = document.getElementById('result-subtype');
+  if (subtypeEl && subTypeKey && RESULT_TYPES[subTypeKey]) {
+    var sub = RESULT_TYPES[subTypeKey];
+    subtypeEl.innerHTML = '<div class="result-subtype-inner">'
+      + '<span class="result-subtype-prefix">サブ</span>'
+      + '<span class="result-subtype-name">' + sub.icon + ' ' + sub.label + '</span>'
+      + '</div>';
+  }
 
   // Hero
   var heroEl = document.getElementById('result-hero');
@@ -558,6 +566,104 @@ function renderResult(typeKey, scores) {
 }
 
 // ========================================
+// LLM分析・アドバイザーメモ生成
+// ========================================
+async function analyzeWithLLM(name, mainType, subType, scores, answers) {
+  try {
+    var qa = QUESTIONS.map(function (q) {
+      return { id: q.id, text: q.text, value: answers[q.id] || 0 };
+    });
+
+    var res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, main_type: mainType, sub_type: subType, scores: scores, qa: qa }),
+    });
+
+    if (!res.ok) return;
+    var data = await res.json();
+
+    // AI分析テキスト
+    var analysisEl = document.getElementById('result-analysis');
+    if (analysisEl) {
+      if (data.analysis) {
+        analysisEl.innerHTML = '<p class="analysis-text">' + escapeHtml(data.analysis) + '</p>';
+      } else {
+        analysisEl.innerHTML = '<p class="analysis-text" style="color:var(--color-text-sub)">分析を取得できませんでした。</p>';
+      }
+    }
+
+    // アドバイザーメモ
+    var memoEl = document.getElementById('result-advisor-memo');
+    if (memoEl) {
+      if (data.advisor_memo) {
+        var mainLabel = RESULT_TYPES[mainType] ? RESULT_TYPES[mainType].label : mainType;
+        var subLabel  = RESULT_TYPES[subType]  ? RESULT_TYPES[subType].label  : subType;
+        var date = new Date().toLocaleDateString('ja-JP');
+        var scoreLines = Object.keys(scores)
+          .sort(function (a, b) { return scores[b] - scores[a]; })
+          .map(function (k) {
+            var lbl = RESULT_TYPES[k] ? RESULT_TYPES[k].label : k;
+            return lbl + ': ' + Number(scores[k]).toFixed(1);
+          }).join('\n');
+
+        var fullMemo = [
+          '━━━━━━━━━━━━━━━━━━━━━━━━━━',
+          'MUSUBU 適職診断レポート',
+          '━━━━━━━━━━━━━━━━━━━━━━━━━━',
+          '氏名: ' + name,
+          '診断日: ' + date,
+          '',
+          'メインタイプ: ' + mainLabel,
+          'サブタイプ:   ' + subLabel,
+          '',
+          '■ タイプ別スコア',
+          scoreLines,
+          '',
+          '■ キャリアアドバイザーへのメモ',
+          data.advisor_memo,
+          '━━━━━━━━━━━━━━━━━━━━━━━━━━',
+        ].join('\n');
+
+        window._advisorMemoText = fullMemo;
+
+        memoEl.innerHTML = '<div class="advisor-memo-box">' + escapeHtml(data.advisor_memo) + '</div>'
+          + '<button class="btn-copy" id="btn-copy-memo">📋 コピー</button>';
+
+        var copyBtn = document.getElementById('btn-copy-memo');
+        if (copyBtn) {
+          copyBtn.addEventListener('click', function () {
+            navigator.clipboard.writeText(window._advisorMemoText || data.advisor_memo).then(function () {
+              copyBtn.textContent = '✓ コピーしました';
+              copyBtn.classList.add('copied');
+              setTimeout(function () {
+                copyBtn.textContent = '📋 コピー';
+                copyBtn.classList.remove('copied');
+              }, 2000);
+            });
+          });
+        }
+
+        // localStorageに保存
+        var progress = loadProgress();
+        if (progress) {
+          progress.analysis    = data.analysis;
+          progress.advisor_memo = data.advisor_memo;
+          saveProgress(progress);
+        }
+      } else {
+        memoEl.innerHTML = '<p class="analysis-text" style="color:var(--color-text-sub)">メモを取得できませんでした。</p>';
+      }
+    }
+  } catch (e) {
+    var el = document.getElementById('result-analysis');
+    if (el) el.innerHTML = '<p class="analysis-text" style="color:var(--color-text-sub)">分析を取得できませんでした。</p>';
+    var mel = document.getElementById('result-advisor-memo');
+    if (mel) mel.innerHTML = '<p class="analysis-text" style="color:var(--color-text-sub)">メモを取得できませんでした。</p>';
+  }
+}
+
+// ========================================
 // 氏名送信
 // ========================================
 async function submitUserInfo() {
@@ -575,20 +681,25 @@ async function submitUserInfo() {
   nameInput.classList.remove('error');
   errorEl.style.display = 'none';
 
-  var answers = getAnswers();
-  var scores  = calculateScores(answers);
-  var typeKey = calculateType(scores);
-  renderResult(typeKey, scores);
+  var answers    = getAnswers();
+  var scores     = calculateScores(answers);
+  var typeKey    = calculateType(scores);
+  var subTypeKey = calculateSubType(scores, typeKey);
+  renderResult(typeKey, subTypeKey, scores);
 
   var progress = loadProgress();
   if (progress) {
-    progress.completed    = true;
-    progress.name         = name;
-    progress.result_type  = typeKey;
+    progress.completed     = true;
+    progress.name          = name;
+    progress.result_type   = typeKey;
+    progress.result_subtype = subTypeKey;
     progress.result_scores = scores;
     saveProgress(progress);
     apiUpdateSession(progress.session_id, { completed: true, name: name, result_type: typeKey });
   }
+
+  // LLM分析（非同期・結果画面表示後に更新）
+  analyzeWithLLM(name, typeKey, subTypeKey, scores, answers);
 
   showScreen('screen-result');
 }
@@ -648,7 +759,32 @@ async function init() {
 
   if (progress.completed) {
     // 完走済み（氏名入力済み）→ 結果画面
-    if (progress.result_type) renderResult(progress.result_type, progress.result_scores || null);
+    if (progress.result_type) {
+      renderResult(progress.result_type, progress.result_subtype || null, progress.result_scores || null);
+      // 保存済み分析を復元
+      if (progress.analysis) {
+        var el = document.getElementById('result-analysis');
+        if (el) el.innerHTML = '<p class="analysis-text">' + escapeHtml(progress.analysis) + '</p>';
+      }
+      if (progress.advisor_memo) {
+        var memoEl = document.getElementById('result-advisor-memo');
+        if (memoEl) {
+          window._advisorMemoText = progress.advisor_memo;
+          memoEl.innerHTML = '<div class="advisor-memo-box">' + escapeHtml(progress.advisor_memo) + '</div>'
+            + '<button class="btn-copy" id="btn-copy-memo">📋 コピー</button>';
+          var copyBtn = document.getElementById('btn-copy-memo');
+          if (copyBtn) {
+            copyBtn.addEventListener('click', function () {
+              navigator.clipboard.writeText(window._advisorMemoText).then(function () {
+                copyBtn.textContent = '✓ コピーしました';
+                copyBtn.classList.add('copied');
+                setTimeout(function () { copyBtn.textContent = '📋 コピー'; copyBtn.classList.remove('copied'); }, 2000);
+              });
+            });
+          }
+        }
+      }
+    }
     showScreen('screen-result');
     return;
   }

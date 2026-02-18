@@ -533,6 +533,107 @@ body {
   flex-shrink: 0;
 }
 
+/* ---- Sub Type ---- */
+.result-subtype {
+  margin-top: 12px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.9);
+}
+
+.result-subtype-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.2);
+  padding: 5px 14px;
+  border-radius: 999px;
+}
+
+.result-subtype-prefix {
+  opacity: 0.8;
+}
+
+.result-subtype-name {
+  font-weight: 700;
+}
+
+/* ---- AI Analysis / Loading ---- */
+.analysis-loading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 0;
+  color: var(--color-text-sub);
+}
+
+.loading-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  animation: dotPulse 1.2s ease-in-out infinite;
+}
+
+.loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotPulse {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40%           { transform: scale(1);   opacity: 1; }
+}
+
+.loading-label {
+  font-size: 13px;
+  margin-left: 4px;
+}
+
+.analysis-text {
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--color-text);
+  white-space: pre-wrap;
+}
+
+/* ---- Advisor Memo ---- */
+.advisor-memo-box {
+  background: var(--color-bg);
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--color-text);
+  white-space: pre-wrap;
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", monospace;
+  margin-bottom: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.btn-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-sub);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background var(--transition), color var(--transition);
+}
+
+.btn-copy:hover {
+  background: var(--color-bg);
+}
+
+.btn-copy.copied {
+  color: #06C755;
+  border-color: #06C755;
+}
+
 /* ---- CTA ---- */
 .result-cta-wrap {
   text-align: center;

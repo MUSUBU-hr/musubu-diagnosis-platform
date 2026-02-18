@@ -148,6 +148,7 @@
         <p class="result-title-label">あなたは</p>
         <div class="result-type-name" id="result-type-name"></div>
         <p class="result-tagline" id="result-tagline"></p>
+        <div class="result-subtype" id="result-subtype"></div>
       </div>
     </div>
 
@@ -166,10 +167,32 @@
         <div id="result-scores"></div>
       </div>
 
+      <!-- AI 個別分析 -->
+      <div class="result-card">
+        <div class="result-card-title">✨ AI 個別分析</div>
+        <div id="result-analysis">
+          <div class="analysis-loading">
+            <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
+            <span class="loading-label">あなたの回答を分析中...</span>
+          </div>
+        </div>
+      </div>
+
       <!-- 説明・特徴 -->
       <div class="result-card">
         <p id="result-type-desc" class="result-desc-text"></p>
         <div id="result-type-traits" class="result-traits-grid"></div>
+      </div>
+
+      <!-- アドバイザー用メモ -->
+      <div class="result-card">
+        <div class="result-card-title">📋 キャリアアドバイザー用メモ</div>
+        <div id="result-advisor-memo">
+          <div class="analysis-loading">
+            <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
+            <span class="loading-label">メモを生成中...</span>
+          </div>
+        </div>
       </div>
 
       <!-- LINE CTA -->
