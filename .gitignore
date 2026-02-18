@@ -1,0 +1,5 @@
+node_modules/
+*.png
+screenshot.js
+debug.js
+debug2.png
