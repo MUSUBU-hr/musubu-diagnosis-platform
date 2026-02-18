@@ -1,3 +1,4 @@
+# musubu-diagnosis-platform
 FROM nginx:alpine
 
 # Cloud Run は PORT=8080 を要求するので nginx を 8080 で待受
