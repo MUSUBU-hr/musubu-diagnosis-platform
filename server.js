@@ -186,7 +186,7 @@ ${name}さん本人に向けた個別分析コメント（200〜250字）。
     const client = new Anthropic();
     const message = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1024,
+      max_tokens: 3000,
       messages: [{ role: 'user', content: prompt }],
     });
 
