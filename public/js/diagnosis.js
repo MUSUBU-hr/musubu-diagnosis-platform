@@ -79,6 +79,60 @@ const TOTAL_BLOCKS = 5;
 const STORAGE_KEY  = 'musubu_diagnosis';
 
 // ========================================
+// タイプ別 設問マッピング
+// ========================================
+const TYPE_MAP = {
+  leader:      [2, 5, 7, 8, 25, 32, 34, 39, 45],
+  supporter:   [1, 3, 4, 6, 31, 38],
+  analyst:     [11, 14, 16, 17, 21, 22, 27, 29],
+  creator:     [19, 23, 26, 37, 40, 44, 46, 48],
+  specialist:  [12, 15, 18, 20, 24, 33, 35, 36, 43, 49],
+  challenger:  [9, 10, 13, 28, 30, 41, 42, 47, 50],
+};
+
+// ========================================
+// タイプ別 結果テキスト
+// ========================================
+const RESULT_TYPES = {
+  leader: {
+    label: 'リーダータイプ',
+    icon: '👑',
+    desc: '人を巻き込み、チームを引っ張っていくことに喜びを感じるタイプです。責任感が強く、周囲に影響を与えながら目標を達成することを得意とします。競争環境の中でも臆せず、積極的に前に出る行動力があります。',
+    traits: ['決断力がある', '人を動かすのが得意', '責任感が強い'],
+  },
+  supporter: {
+    label: 'サポータータイプ',
+    icon: '🤝',
+    desc: '人の気持ちに寄り添い、チームや組織を内側から支えることに長けたタイプです。共感力が高く、周囲の人が安心して力を発揮できる環境をつくることを得意とします。縁の下の力持ちとして、チーム全体の成果を底上げします。',
+    traits: ['共感力が高い', '人の話をよく聞く', 'チームを陰で支える'],
+  },
+  analyst: {
+    label: 'アナリストタイプ',
+    icon: '🔍',
+    desc: 'データや論理を基に物事を深く考察し、正確な判断を下すことを得意とするタイプです。感情より事実を重視し、細部まで丁寧に分析するプロセスに充実感を覚えます。複雑な問題ほど本領を発揮します。',
+    traits: ['論理的思考が得意', '細部への注意力が高い', 'データに基づいて判断できる'],
+  },
+  creator: {
+    label: 'クリエイタータイプ',
+    icon: '🎨',
+    desc: '新しいアイデアを生み出し、それを独自の形で表現することに情熱を持つタイプです。既存の枠にとらわれず、遊び心と発想力を武器に新しい価値を創造します。自分のビジョンを形にするプロセス自体を楽しめます。',
+    traits: ['発想力が豊か', '型破りな発想ができる', '表現することが好き'],
+  },
+  specialist: {
+    label: 'スペシャリストタイプ',
+    icon: '🎯',
+    desc: '一つの分野を深く極めることに強いこだわりと誇りを持つタイプです。コツコツと積み上げる努力を惜しまず、高い専門性をもって質の高いアウトプットを追求します。長期的な視点で自分のスキルを磨き続けます。',
+    traits: ['専門性へのこだわりが強い', '継続力・忍耐力がある', '品質にこだわる完璧主義'],
+  },
+  challenger: {
+    label: 'チャレンジャータイプ',
+    icon: '🚀',
+    desc: '変化や刺激を好み、新しい環境・経験に積極的に飛び込んでいくタイプです。現状維持よりも挑戦を選び、失敗を恐れずにどんどん前に進む行動力があります。多様な分野への好奇心を原動力に、幅広く活躍できます。',
+    traits: ['変化への適応力が高い', '好奇心旺盛', '行動が速い'],
+  },
+};
+
+// ========================================
 // UUID生成
 // ========================================
 function generateUUID() {
@@ -323,6 +377,55 @@ function submitBlock(blockNum) {
 }
 
 // ========================================
+// スコアリング
+// ========================================
+function getAnswers() {
+  var answers = {};
+  for (var q = 1; q <= 50; q++) {
+    var selected = document.querySelector('input[name="q' + q + '"]:checked');
+    answers[q] = selected ? parseInt(selected.value, 10) : 0;
+  }
+  return answers;
+}
+
+function calculateType(answers) {
+  var best = null;
+  var bestScore = -1;
+
+  Object.keys(TYPE_MAP).forEach(function (type) {
+    var qids = TYPE_MAP[type];
+    var total = qids.reduce(function (sum, qid) { return sum + (answers[qid] || 0); }, 0);
+    var avg = total / qids.length;
+    if (avg > bestScore) {
+      bestScore = avg;
+      best = type;
+    }
+  });
+
+  return best || 'challenger';
+}
+
+function renderResult(typeKey) {
+  var type = RESULT_TYPES[typeKey];
+  if (!type) return;
+
+  var nameEl   = document.getElementById('result-type-name');
+  var descEl   = document.getElementById('result-type-desc');
+  var traitsEl = document.getElementById('result-type-traits');
+
+  if (nameEl)   nameEl.textContent = type.label;
+  if (descEl)   descEl.textContent = type.desc;
+  if (traitsEl) {
+    traitsEl.innerHTML = type.traits.map(function (trait) {
+      return '<div class="trait-item">'
+        + '<span class="trait-icon">' + type.icon + '</span>'
+        + '<span>' + escapeHtml(trait) + '</span>'
+        + '</div>';
+    }).join('');
+  }
+}
+
+// ========================================
 // 氏名送信
 // ========================================
 async function submitUserInfo() {
@@ -340,13 +443,18 @@ async function submitUserInfo() {
   nameInput.classList.remove('error');
   errorEl.style.display = 'none';
 
+  var answers = getAnswers();
+  var typeKey = calculateType(answers);
+  renderResult(typeKey);
+
   var progress = loadProgress();
   if (progress) {
     progress.completed = true;
     progress.name = name;
+    progress.result_type = typeKey;
     saveProgress(progress);
-    // API更新（completed=true, name保存）
-    apiUpdateSession(progress.session_id, { completed: true, name: name });
+    // API更新（completed=true, name, result_type保存）
+    apiUpdateSession(progress.session_id, { completed: true, name: name, result_type: typeKey });
   }
 
   showScreen('screen-result');
@@ -407,6 +515,7 @@ async function init() {
 
   if (progress.completed) {
     // 完走済み（氏名入力済み）→ 結果画面
+    if (progress.result_type) renderResult(progress.result_type);
     showScreen('screen-result');
     return;
   }

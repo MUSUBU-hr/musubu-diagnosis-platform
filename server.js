@@ -71,7 +71,7 @@ app.get('/api/sessions/:id', async (req, res) => {
 // ========================================
 app.patch('/api/sessions/:id', async (req, res) => {
   try {
-    const { max_block, completed, name } = req.body;
+    const { max_block, completed, name, result_type } = req.body;
 
     const docRef = firestore.collection(COLLECTION).doc(req.params.id);
     const doc = await docRef.get();
@@ -94,6 +94,10 @@ app.patch('/api/sessions/:id', async (req, res) => {
 
     if (typeof name === 'string' && name.trim()) {
       updates.name = name.trim();
+    }
+
+    if (typeof result_type === 'string' && result_type) {
+      updates.result_type = result_type;
     }
 
     await docRef.update(updates);
