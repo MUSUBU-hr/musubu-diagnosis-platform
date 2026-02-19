@@ -80,14 +80,16 @@ const STORAGE_KEY  = 'musubu_diagnosis';
 
 // ========================================
 // タイプ別 設問マッピング
+// pos: 順方向（高スコア＝タイプ強い）
+// neg: 逆転（高スコア＝タイプ弱い → 6-answer で処理）
 // ========================================
 const TYPE_MAP = {
-  leader:      [2, 5, 7, 8, 25, 32, 34, 39, 45],
-  supporter:   [1, 3, 4, 6, 31, 38],
-  analyst:     [11, 14, 16, 17, 21, 22, 27, 29],
-  creator:     [19, 23, 26, 37, 40, 44, 46, 48],
-  specialist:  [12, 15, 18, 20, 24, 33, 35, 36, 43, 49],
-  challenger:  [9, 10, 13, 28, 30, 41, 42, 47, 50],
+  leader:     { pos: [2, 5, 7, 8, 25, 32, 34, 39, 45], neg: [18] },
+  supporter:  { pos: [1, 3, 4, 6, 31, 38],              neg: [18] },
+  analyst:    { pos: [11, 14, 16, 17, 21, 22, 27, 29],  neg: [] },
+  creator:    { pos: [19, 23, 26, 37, 40, 44, 46, 48],  neg: [] },
+  specialist: { pos: [12, 15, 18, 20, 24, 33, 35, 36, 43, 49], neg: [41] },
+  challenger: { pos: [9, 10, 13, 28, 30, 41, 42, 47, 50],      neg: [36, 43] },
 };
 
 // ========================================
@@ -415,9 +417,14 @@ function getAnswers() {
 function calculateScores(answers) {
   var scores = {};
   Object.keys(TYPE_MAP).forEach(function (type) {
-    var qids = TYPE_MAP[type];
-    var total = qids.reduce(function (sum, qid) { return sum + (answers[qid] || 0); }, 0);
-    scores[type] = Math.round((total / qids.length) * 10) / 10;
+    var mapping = TYPE_MAP[type];
+    var allQids = mapping.pos.concat(mapping.neg);
+    var total = allQids.reduce(function (sum, qid) {
+      var val = answers[qid] || 0;
+      if (val > 0 && mapping.neg.indexOf(qid) !== -1) val = 6 - val;
+      return sum + val;
+    }, 0);
+    scores[type] = Math.round((total / allQids.length) * 10) / 10;
   });
   return scores;
 }

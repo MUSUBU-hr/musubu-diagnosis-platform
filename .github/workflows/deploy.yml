@@ -45,4 +45,5 @@ jobs:
             --image "${{ env.IMAGE }}" \
             --region "${{ env.REGION }}" \
             --project "${{ env.PROJECT_ID }}" \
-            --allow-unauthenticated
+            --allow-unauthenticated \
+            --set-secrets="ANTHROPIC_API_KEY=ANTHROPIC_API_KEY:latest"
