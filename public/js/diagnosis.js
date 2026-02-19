@@ -247,10 +247,23 @@ function showScreen(screenId) {
 
 // ========================================
 // 設問レンダリング
+// 全50問をシャッフルして5分割したものを保持
 // ========================================
+var _shuffledQuestions = null;
+
+function buildShuffledQuestions() {
+  var arr = QUESTIONS.slice();
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+  }
+  _shuffledQuestions = arr;
+}
+
 function renderBlock(blockNum) {
-  const startIdx = (blockNum - 1) * BLOCK_SIZE;
-  const blockQuestions = QUESTIONS.slice(startIdx, startIdx + BLOCK_SIZE);
+  var startIdx = (blockNum - 1) * BLOCK_SIZE;
+  var blockQuestions = _shuffledQuestions.slice(startIdx, startIdx + BLOCK_SIZE);
+
   const container = document.getElementById('questions-block' + blockNum);
   if (!container) return;
 
@@ -289,6 +302,7 @@ function renderBlock(blockNum) {
 }
 
 function renderAllBlocks() {
+  buildShuffledQuestions();
   for (var i = 1; i <= TOTAL_BLOCKS; i++) {
     renderBlock(i);
   }
@@ -460,8 +474,8 @@ function buildMapSVG(activeKey) {
     // 軸ラベル
     '<text x="140" y="11" text-anchor="middle" font-size="9" fill="#94A3B8" font-weight="600">変化志向</text>',
     '<text x="140" y="255" text-anchor="middle" font-size="9" fill="#94A3B8" font-weight="600">安定志向</text>',
-    '<text x="22" y="133" text-anchor="middle" font-size="9" fill="#94A3B8" font-weight="600">人</text>',
-    '<text x="258" y="133" text-anchor="middle" font-size="9" fill="#94A3B8" font-weight="600">課題</text>',
+    '<text x="18" y="133" text-anchor="middle" font-size="8" fill="#94A3B8" font-weight="600">対人志向</text>',
+    '<text x="262" y="133" text-anchor="middle" font-size="8" fill="#94A3B8" font-weight="600">対課題志向</text>',
   ];
 
   // 非アクティブタイプのドット
@@ -616,7 +630,7 @@ async function analyzeWithLLM(name, mainType, subType, scores, answers) {
 
         var fullMemo = [
           '━━━━━━━━━━━━━━━━━━━━━━━━━━',
-          'MUSUBU 適職診断レポート',
+          'MUSUBU キャリアタイプ診断レポート',
           '━━━━━━━━━━━━━━━━━━━━━━━━━━',
           '氏名: ' + name,
           '診断日: ' + date,
