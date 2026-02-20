@@ -252,12 +252,7 @@ function showScreen(screenId) {
 var _shuffledQuestions = null;
 
 function buildShuffledQuestions() {
-  var arr = QUESTIONS.slice();
-  for (var i = arr.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
-  }
-  _shuffledQuestions = arr;
+  _shuffledQuestions = QUESTIONS.slice();
 }
 
 function renderBlock(blockNum) {
