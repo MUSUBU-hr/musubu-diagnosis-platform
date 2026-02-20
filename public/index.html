@@ -138,7 +138,7 @@
             <input type="text" id="input-first-name" class="form-input" placeholder="例：太郎" autocomplete="given-name">
           </div>
         </div>
-        <p class="userinfo-note">面談をご希望の場合、診断結果と照合するために使用することがあります。</p>
+        <p class="userinfo-note"><strong>※フルネーム推奨</strong><br>フルネームをご記入いただくと、担当アドバイザーが事前に診断結果を確認し、初回面談から的確なサポートをご提供できます。</p>
         <p id="userinfo-error" class="validation-msg" style="display:none;"></p>
         <button id="btn-submit-userinfo" class="btn btn-primary btn-large">診断結果を見る</button>
       </div>
@@ -179,8 +179,8 @@
         <div class="result-card-title">✨ <span id="result-name-analysis"></span>さんの個別分析</div>
         <div id="result-analysis">
           <div class="analysis-loading">
-            <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
-            <span class="loading-label">あなたの回答を分析中...</span>
+            <div class="loading-spinner"></div>
+            <span class="loading-label">AIが診断中です...</span>
           </div>
         </div>
       </div>
