@@ -674,25 +674,64 @@ body {
 
 /* ---- AI Analysis / Loading ---- */
 .analysis-loading {
+  padding: 20px 4px;
+}
+
+.loading-steps {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 14px;
-  padding: 32px 0;
+}
+
+.loading-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 0;
+  animation: stepAppear 0.4s ease forwards;
+}
+
+.loading-step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-border);
+  flex-shrink: 0;
+  transition: background 0.3s ease;
+}
+
+.loading-step-dot.is-active {
+  background: var(--color-accent);
+  animation: dotPulse 1s ease-in-out 3.6s infinite;
+}
+
+.loading-step-text {
+  font-size: 13px;
+  font-weight: 500;
   color: var(--color-text-sub);
 }
 
-.loading-spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid var(--color-border);
-  border-top-color: var(--color-accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+/* ステップが順番に出現したらドットを塗る */
+.loading-step:nth-child(1) .loading-step-dot { animation: stepAppear 0.4s ease forwards, dotFill 0.3s ease 0.3s forwards; }
+.loading-step:nth-child(2) .loading-step-dot { animation: stepAppear 0.4s ease 1.2s forwards, dotFill 0.3s ease 1.5s forwards; }
+.loading-step:nth-child(3) .loading-step-dot { animation: stepAppear 0.4s ease 2.4s forwards, dotFill 0.3s ease 2.7s forwards; }
+
+@keyframes stepAppear {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+@keyframes dotFill {
+  to { background: var(--color-accent); }
+}
+
+@keyframes dotPulse {
+  0%, 100% { transform: scale(1);   opacity: 1; }
+  50%       { transform: scale(0.6); opacity: 0.4; }
+}
+
+.loading-spinner {
+  display: none;
 }
 
 .loading-dot {
@@ -700,9 +739,10 @@ body {
 }
 
 .loading-label {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--color-text-sub);
+  padding: 16px 0 4px;
 }
 
 .analysis-text {

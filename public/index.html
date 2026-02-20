@@ -180,8 +180,24 @@
         <div class="result-card-title">✨ <span id="result-name-analysis"></span>さんの個別分析</div>
         <div id="result-analysis">
           <div class="analysis-loading">
-            <div class="loading-spinner"></div>
-            <span class="loading-label">AIが診断中です...</span>
+            <div class="loading-steps">
+              <div class="loading-step" style="animation-delay:0s">
+                <span class="loading-step-dot"></span>
+                <span class="loading-step-text">回答データを集計中</span>
+              </div>
+              <div class="loading-step" style="animation-delay:1.2s">
+                <span class="loading-step-dot"></span>
+                <span class="loading-step-text">キャリアタイプを判定中</span>
+              </div>
+              <div class="loading-step" style="animation-delay:2.4s">
+                <span class="loading-step-dot"></span>
+                <span class="loading-step-text">個別コメントを生成中</span>
+              </div>
+              <div class="loading-step" style="animation-delay:3.6s">
+                <span class="loading-step-dot is-active"></span>
+                <span class="loading-step-text">アドバイスを作成中</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -197,7 +213,6 @@
         <div class="result-card-title">📋 キャリアアドバイザー用メモ</div>
         <div id="result-advisor-memo">
           <div class="analysis-loading">
-            <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
             <span class="loading-label">メモを生成中...</span>
           </div>
         </div>
