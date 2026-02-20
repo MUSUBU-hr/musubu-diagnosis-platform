@@ -474,10 +474,10 @@ function buildMapSVG(activeKey) {
     '<line x1="140" y1="16" x2="140" y2="244" stroke="#CBD5E1" stroke-width="1.5"/>',
     '<line x1="26" y1="130" x2="254" y2="130" stroke="#CBD5E1" stroke-width="1.5"/>',
     // 軸ラベル
-    '<text x="140" y="13" text-anchor="middle" font-size="12" fill="#94A3B8" font-weight="600">変化志向</text>',
-    '<text x="140" y="257" text-anchor="middle" font-size="12" fill="#94A3B8" font-weight="600">安定志向</text>',
-    '<text x="19" y="133" text-anchor="middle" font-size="11" fill="#94A3B8" font-weight="600">対人志向</text>',
-    '<text x="261" y="133" text-anchor="middle" font-size="11" fill="#94A3B8" font-weight="600">対課題志向</text>',
+    '<text x="140" y="12" text-anchor="middle" font-size="10" fill="#94A3B8" font-weight="600">変化志向</text>',
+    '<text x="140" y="256" text-anchor="middle" font-size="10" fill="#94A3B8" font-weight="600">安定志向</text>',
+    '<text x="19" y="133" text-anchor="middle" font-size="10" fill="#94A3B8" font-weight="600">対人志向</text>',
+    '<text x="261" y="133" text-anchor="middle" font-size="10" fill="#94A3B8" font-weight="600">対課題志向</text>',
   ];
 
   // 非アクティブタイプのドット
@@ -487,7 +487,7 @@ function buildMapSVG(activeKey) {
     lines.push(
       '<circle cx="' + t.mapX + '" cy="' + t.mapY + '" r="14" fill="' + t.color + '" opacity="0.15"/>',
       '<circle cx="' + t.mapX + '" cy="' + t.mapY + '" r="8" fill="' + t.color + '" opacity="0.35"/>',
-      '<text x="' + t.mapX + '" y="' + (t.mapY + 24) + '" text-anchor="middle" font-size="11" fill="' + t.color + '" font-weight="600">' + t.label.replace('タイプ', '') + '</text>'
+      '<text x="' + t.mapX + '" y="' + (t.mapY + 23) + '" text-anchor="middle" font-size="10" fill="' + t.color + '" font-weight="600">' + t.label.replace('タイプ', '') + '</text>'
     );
   });
 
