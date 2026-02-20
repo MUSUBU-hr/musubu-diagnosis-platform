@@ -511,7 +511,7 @@ function buildScoreBars(scores, topKey) {
     var pct = Math.round((scores[key] / 5) * 100);
     var isTop = key === topKey;
     return '<div class="score-item' + (isTop ? ' is-top' : '') + '">'
-      + '<div class="score-label"><span>' + t.icon + '</span>' + t.label.replace('タイプ', '') + '</div>'
+      + '<div class="score-label"><span>' + t.icon + '</span>' + t.label.replace('タイプ', '') + (isTop ? '<span class="score-top-badge">メイン</span>' : '') + '</div>'
       + '<div class="score-track"><div class="score-fill" data-target="' + pct + '%" style="background:' + t.color + ';"></div></div>'
       + '<div class="score-value">' + scores[key].toFixed(1) + '</div>'
       + '</div>';
