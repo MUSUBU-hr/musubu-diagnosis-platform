@@ -504,13 +504,15 @@ function buildMapSVG(activeKey) {
     + lines.join('') + '</svg>';
 }
 
-function buildScoreBars(scores, topKey) {
+function buildScoreBars(scores, topKey, subKey) {
   var order = ['leader', 'challenger', 'creator', 'supporter', 'analyst', 'specialist'];
   return order.map(function (key) {
     var t = RESULT_TYPES[key];
     var pct = Math.round((scores[key] / 5) * 100);
     var isTop = key === topKey;
-    return '<div class="score-item' + (isTop ? ' is-top' : '') + '">'
+    var isSub = key === subKey;
+    var cls = 'score-item' + (isTop ? ' is-top' : isSub ? ' is-sub' : '');
+    return '<div class="' + cls + '">'
       + '<div class="score-label"><span>' + t.icon + '</span>' + t.label.replace('タイプ', '') + '</div>'
       + '<div class="score-track"><div class="score-fill" data-target="' + pct + '%" style="background:' + t.color + ';"></div></div>'
       + '<div class="score-value">' + scores[key].toFixed(1) + '</div>'
@@ -558,7 +560,7 @@ function renderResult(typeKey, subTypeKey, scores) {
   var scoresEl = document.getElementById('result-scores');
   if (scoresEl) {
     if (scores) {
-      scoresEl.innerHTML = buildScoreBars(scores, typeKey);
+      scoresEl.innerHTML = buildScoreBars(scores, typeKey, subTypeKey);
       // バーをアニメーション
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {

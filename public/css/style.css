@@ -539,8 +539,18 @@ body {
   color: var(--color-text-sub);
 }
 
-.score-item:not(.is-top) {
+.score-item:not(.is-top):not(.is-sub) {
   opacity: 0.45;
+}
+
+.score-item.is-sub {
+  opacity: 0.75;
+  background: rgba(126, 191, 187, 0.05);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  margin-left: -12px;
+  margin-right: -12px;
+  border: 1px solid rgba(126, 191, 187, 0.15);
 }
 
 .score-item.is-top {
