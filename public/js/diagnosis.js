@@ -581,7 +581,7 @@ function renderResult(typeKey, subTypeKey, scores) {
 
   // タイプ見出し
   var titleEl = document.getElementById('result-type-title');
-  if (titleEl) titleEl.textContent = type.label + 'とは';
+  if (titleEl) titleEl.textContent = type.icon + ' ' + type.label + 'とは';
 
   // 説明文
   var descEl = document.getElementById('result-type-desc');

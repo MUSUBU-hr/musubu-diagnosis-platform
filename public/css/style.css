@@ -496,6 +496,11 @@ body {
   margin: 0 20px;
 }
 
+.type-card {
+  background: rgba(126, 191, 187, 0.07);
+  border-top-color: rgba(126, 191, 187, 0.4);
+}
+
 .result-card {
   background: var(--color-surface);
   border-radius: var(--radius-lg);
