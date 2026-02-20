@@ -462,6 +462,40 @@ body {
   margin: 0 auto;
 }
 
+/* ---- AI統合カード ---- */
+.ai-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.ai-card-header {
+  background: linear-gradient(135deg, #7EBFBB, #4A9491);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 12px 20px;
+}
+
+.ai-section {
+  padding: 16px 20px;
+}
+
+.ai-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--color-accent-dark);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.ai-section-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 0 20px;
+}
+
 .result-card {
   background: var(--color-surface);
   border-radius: var(--radius-lg);
