@@ -183,16 +183,28 @@ body {
 
 .progress-track {
   height: 6px;
-  background-color: var(--color-progress-bg);
+  background: linear-gradient(90deg, #B8E2E0 0%, #7EBFBB 55%, #4A9491 100%);
   border-radius: 999px;
   overflow: hidden;
+  position: relative;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-accent), #A8D5D3);
+  background: transparent;
   border-radius: 999px;
   transition: width 0.4s ease;
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 100%;
+  width: 100vw;
+  bottom: 0;
+  background: var(--color-progress-bg);
 }
 
 /* ---------- QUESTIONS CONTAINER ---------- */
@@ -322,17 +334,16 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #7EBFBB, #4A9491);
+  background: var(--color-accent);
   color: #FFFFFF;
   width: 100%;
   border-radius: 999px;
   letter-spacing: 0.03em;
-  box-shadow: 0 4px 14px rgba(126, 191, 187, 0.4);
+  box-shadow: 0 3px 10px rgba(126, 191, 187, 0.35);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #5EA8A4, #3A7E7B);
-  box-shadow: 0 4px 18px rgba(126, 191, 187, 0.5);
+  background: var(--color-accent-dark);
 }
 
 .btn-large {
@@ -454,9 +465,9 @@ body {
   border-radius: var(--radius-lg);
   padding: 20px;
   margin-bottom: 14px;
-  box-shadow: 0 2px 12px rgba(126, 191, 187, 0.12);
-  border: 1px solid rgba(126, 191, 187, 0.2);
-  border-top: 3px solid var(--color-accent);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  border-top: 2px solid rgba(126, 191, 187, 0.5);
 }
 
 .result-card-title {
