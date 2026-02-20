@@ -512,8 +512,13 @@ function buildScoreBars(scores, topKey, subKey) {
     var isTop = key === topKey;
     var isSub = key === subKey;
     var cls = 'score-item' + (isTop ? ' is-top' : isSub ? ' is-sub' : '');
+    var badge = isTop ? '<span class="score-rank-badge is-main">メイン</span>'
+               : isSub ? '<span class="score-rank-badge is-sub-badge">サブ</span>'
+               : '';
     return '<div class="' + cls + '">'
-      + '<div class="score-label"><span>' + t.icon + '</span>' + t.label.replace('タイプ', '') + '</div>'
+      + '<div class="score-label">'
+      + (badge ? '<div class="score-label-stack">' + badge + '<div class="score-label-name"><span>' + t.icon + '</span>' + t.label.replace('タイプ', '') + '</div></div>' : '<span>' + t.icon + '</span>' + t.label.replace('タイプ', ''))
+      + '</div>'
       + '<div class="score-track"><div class="score-fill" data-target="' + pct + '%" style="background:' + t.color + ';"></div></div>'
       + '<div class="score-value">' + scores[key].toFixed(1) + '</div>'
       + '</div>';

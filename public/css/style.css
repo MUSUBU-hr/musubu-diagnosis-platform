@@ -563,14 +563,50 @@ body {
   border: 1px solid rgba(126, 191, 187, 0.3);
 }
 
-.score-item.is-top .score-label {
+.score-item.is-top .score-label,
+.score-item.is-sub .score-label {
   font-weight: 700;
   color: var(--color-text);
+  width: 88px;
 }
 
 .score-item.is-top .score-value {
   color: var(--color-accent-dark);
   font-size: 13px;
+}
+
+.score-label-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.score-label-name {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.score-rank-badge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 1px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.score-rank-badge.is-main {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.score-rank-badge.is-sub-badge {
+  background: rgba(126, 191, 187, 0.2);
+  color: var(--color-accent-dark);
+  border: 1px solid rgba(126, 191, 187, 0.4);
 }
 
 
