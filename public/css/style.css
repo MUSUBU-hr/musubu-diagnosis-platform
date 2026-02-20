@@ -869,6 +869,55 @@ body {
   margin-bottom: 16px;
 }
 
+/* ---- 面談誘導バナー ---- */
+.cta-banner {
+  background: linear-gradient(135deg, #7EBFBB 0%, #4A9491 100%);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  text-align: center;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 16px rgba(126, 191, 187, 0.35);
+}
+
+.cta-banner-emoji {
+  font-size: 36px;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.cta-banner-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.cta-banner-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.cta-banner-btn {
+  display: inline-block;
+  background: #fff;
+  color: var(--color-accent-dark);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 12px 28px;
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+.cta-banner-btn:active {
+  opacity: 0.85;
+  transform: scale(0.97);
+}
+
 /* ---------- USER INFO SCREEN ---------- */
 #screen-userinfo {
   background: linear-gradient(160deg, #7EBFBB 0%, #5EA8A4 50%, #4A9491 100%);
