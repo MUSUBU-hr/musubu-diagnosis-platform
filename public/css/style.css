@@ -82,12 +82,24 @@ body {
 }
 
 .logo {
-  font-size: 13px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.15em;
   color: var(--color-accent);
-  margin-bottom: 28px;
+  margin-bottom: 16px;
   text-transform: uppercase;
+}
+
+.ai-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 8px 24px;
+  border-radius: 999px;
+  margin-bottom: 16px;
 }
 
 .start-title {
@@ -102,7 +114,13 @@ body {
   font-size: 15px;
   color: var(--color-text-sub);
   margin-bottom: 28px;
-  line-height: 1.7;
+  line-height: 1.9;
+}
+
+.start-desc-em {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-accent);
 }
 
 .start-features {
