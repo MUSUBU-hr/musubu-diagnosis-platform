@@ -447,9 +447,10 @@ body {
 
 .result-tagline {
   display: block;
-  font-size: 13px;
+  font-size: 15px;
   font-style: italic;
-  color: rgba(255,255,255,0.85);
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
   margin-top: 14px;
   letter-spacing: 0.02em;
 }
@@ -665,7 +666,7 @@ body {
 }
 
 .result-subtype-name {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 700;
   color: rgba(255,255,255,0.9);
 }

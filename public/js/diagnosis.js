@@ -535,7 +535,7 @@ function renderResult(typeKey, subTypeKey, scores) {
     var sub = RESULT_TYPES[subTypeKey];
     subtypeEl.innerHTML = '<div class="result-subtype-inner">'
       + '<span class="result-subtype-prefix">サブタイプ</span>'
-      + '<span class="result-subtype-name">' + sub.icon + '&nbsp;' + sub.label + '</span>'
+      + '<span class="result-subtype-name">' + sub.label + '</span>'
       + '</div>';
   }
 
