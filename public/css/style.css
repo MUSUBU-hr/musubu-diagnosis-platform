@@ -507,11 +507,12 @@ body {
 }
 
 .score-label {
-  width: 88px;
+  width: 104px;
   font-size: 12px;
   font-weight: 600;
   color: var(--color-text);
   flex-shrink: 0;
+  white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -568,7 +569,7 @@ body {
 .score-item.is-sub .score-label {
   font-weight: 700;
   color: var(--color-text);
-  width: 88px;
+  width: 104px;
 }
 
 .score-item.is-top .score-value {
