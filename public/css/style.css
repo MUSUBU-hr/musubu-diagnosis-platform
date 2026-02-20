@@ -482,11 +482,9 @@ body {
 }
 
 .ai-section-title {
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 700;
-  letter-spacing: 0.06em;
   color: var(--color-accent-dark);
-  text-transform: uppercase;
   margin-bottom: 10px;
 }
 
