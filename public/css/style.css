@@ -405,14 +405,15 @@ body {
 
 .result-badge-white {
   display: inline-block;
-  background: rgba(255,255,255,0.25);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  padding: 4px 14px;
+  background: #fff;
+  color: var(--color-accent-dark);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 6px 20px;
   border-radius: 999px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 
 .result-emoji {
@@ -447,10 +448,12 @@ body {
 .result-tagline {
   display: inline-block;
   font-size: 13px;
-  background: rgba(255,255,255,0.2);
-  padding: 5px 18px;
+  font-weight: 600;
+  background: rgba(255,255,255,0.92);
+  color: var(--color-accent-dark);
+  padding: 7px 20px;
   border-radius: 999px;
-  opacity: 0.95;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
 /* ---- Body ---- */
@@ -607,26 +610,32 @@ body {
 
 /* ---- Sub Type ---- */
 .result-subtype {
-  margin-top: 12px;
-  font-size: 12px;
-  color: rgba(255,255,255,0.9);
+  margin-top: 16px;
+  color: #fff;
 }
 
 .result-subtype-inner {
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  background: rgba(255,255,255,0.2);
-  padding: 5px 14px;
-  border-radius: 999px;
+  gap: 4px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.5);
+  padding: 10px 24px;
+  border-radius: 14px;
 }
 
 .result-subtype-prefix {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   opacity: 0.8;
+  text-transform: uppercase;
 }
 
 .result-subtype-name {
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 800;
 }
 
 /* ---- AI Analysis / Loading ---- */
