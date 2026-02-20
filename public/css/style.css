@@ -5,11 +5,11 @@
 
 /* ---------- CSS Variables ---------- */
 :root {
-  --color-accent: #3B82F6;
-  --color-accent-dark: #2563EB;
+  --color-accent: #7EBFBB;
+  --color-accent-dark: #5EA8A4;
   --color-line: #06C755;
   --color-line-dark: #05A847;
-  --color-bg: #F3F4F6;
+  --color-bg: #F2F8F7;
   --color-surface: #FFFFFF;
   --color-text: #1F2937;
   --color-text-sub: #6B7280;
@@ -64,7 +64,7 @@ body {
 
 /* ---------- START SCREEN ---------- */
 #screen-start {
-  background: linear-gradient(160deg, #EFF6FF 0%, #DBEAFE 60%, #BFDBFE 100%);
+  background: linear-gradient(160deg, #F0F8F7 0%, #D9EFEE 60%, #B8E2E0 100%);
 }
 
 #screen-start.active {
@@ -91,7 +91,7 @@ body {
 
 .ai-badge {
   display: inline-block;
-  background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+  background: linear-gradient(135deg, #7EBFBB, #4A9491);
   color: #fff;
   font-size: 18px;
   font-weight: 700;
@@ -184,7 +184,7 @@ body {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-accent), #60A5FA);
+  background: linear-gradient(90deg, var(--color-accent), #A8D5D3);
   border-radius: 999px;
   transition: width 0.4s ease;
 }
@@ -207,8 +207,8 @@ body {
 }
 
 .question-card.answered {
-  border-color: #BFDBFE;
-  background-color: #F0F7FF;
+  border-color: #B8E2E0;
+  background-color: #EFF8F7;
 }
 
 .question-number {
@@ -275,13 +275,13 @@ body {
 
 .scale-label input[type="radio"]:checked + .scale-btn {
   border-color: var(--color-accent);
-  background-color: #EFF6FF;
+  background-color: #EFF8F7;
   color: var(--color-accent);
   font-weight: 700;
 }
 
 .scale-label:active .scale-btn {
-  background-color: #DBEAFE;
+  background-color: #D9EFEE;
 }
 
 /* ---------- BLOCK FOOTER ---------- */
@@ -374,7 +374,7 @@ body {
   padding: 28px 24px 32px;
   text-align: center;
   color: #fff;
-  background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+  background: linear-gradient(135deg, #7EBFBB, #4A9491);
 }
 
 .result-hero-inner {
@@ -698,7 +698,7 @@ body {
 
 /* ---------- USER INFO SCREEN ---------- */
 #screen-userinfo {
-  background: linear-gradient(160deg, #EFF6FF 0%, #DBEAFE 60%, #BFDBFE 100%);
+  background: linear-gradient(160deg, #F0F8F7 0%, #D9EFEE 60%, #B8E2E0 100%);
 }
 
 #screen-userinfo.active {
