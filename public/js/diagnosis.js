@@ -617,24 +617,20 @@ async function analyzeWithLLM(name, mainType, subType, scores, answers) {
     var analysisEl = document.getElementById('result-analysis');
     if (analysisEl) {
       if (data.analysis) {
-        var html = '<p class="analysis-text">' + escapeHtml(data.analysis) + '</p>';
-        if (data.weapon) {
-          html += '<div class="analysis-item"><span class="analysis-item-label">⚔️ あなたの武器</span>'
-               +  '<p class="analysis-item-text">' + escapeHtml(data.weapon) + '</p></div>';
-        }
-        if (data.environment) {
-          html += '<div class="analysis-item"><span class="analysis-item-label">🌱 イキイキする環境</span>'
-               +  '<p class="analysis-item-text">' + escapeHtml(data.environment) + '</p></div>';
-        }
-        if (data.motivation) {
-          html += '<div class="analysis-item"><span class="analysis-item-label">🔥 モチベーションが上がるスイッチ</span>'
-               +  '<p class="analysis-item-text">' + escapeHtml(data.motivation) + '</p></div>';
-        }
-        analysisEl.innerHTML = html;
+        analysisEl.innerHTML = '<p class="analysis-text">' + escapeHtml(data.analysis) + '</p>';
       } else {
         analysisEl.innerHTML = '<p class="analysis-text" style="color:var(--color-text-sub)">分析を取得できませんでした。</p>';
       }
     }
+
+    // 武器・環境・モチベーション（個別カード）
+    var na = '<p class="analysis-item-text" style="color:var(--color-text-sub)">-</p>';
+    var weaponEl = document.getElementById('result-weapon');
+    if (weaponEl) weaponEl.innerHTML = data.weapon ? '<p class="analysis-item-text">' + escapeHtml(data.weapon) + '</p>' : na;
+    var envEl = document.getElementById('result-environment');
+    if (envEl) envEl.innerHTML = data.environment ? '<p class="analysis-item-text">' + escapeHtml(data.environment) + '</p>' : na;
+    var motivEl = document.getElementById('result-motivation');
+    if (motivEl) motivEl.innerHTML = data.motivation ? '<p class="analysis-item-text">' + escapeHtml(data.motivation) + '</p>' : na;
 
     // アドバイザーメモ
     var memoEl = document.getElementById('result-advisor-memo');
@@ -703,6 +699,10 @@ async function analyzeWithLLM(name, mainType, subType, scores, answers) {
     if (el) el.innerHTML = '<p class="analysis-text" style="color:var(--color-text-sub)">分析を取得できませんでした。</p>';
     var mel = document.getElementById('result-advisor-memo');
     if (mel) mel.innerHTML = '<p class="analysis-text" style="color:var(--color-text-sub)">メモを取得できませんでした。</p>';
+    var errMsg = '<p class="analysis-item-text" style="color:var(--color-text-sub)">-</p>';
+    var we = document.getElementById('result-weapon');      if (we) we.innerHTML = errMsg;
+    var ee = document.getElementById('result-environment'); if (ee) ee.innerHTML = errMsg;
+    var me = document.getElementById('result-motivation');  if (me) me.innerHTML = errMsg;
   }
 }
 
