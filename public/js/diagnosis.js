@@ -476,8 +476,8 @@ function buildMapSVG(activeKey) {
     // 軸ラベル
     '<text x="140" y="12" text-anchor="middle" font-size="10" fill="#94A3B8" font-weight="600">変化志向</text>',
     '<text x="140" y="256" text-anchor="middle" font-size="10" fill="#94A3B8" font-weight="600">安定志向</text>',
-    '<text x="19" y="133" text-anchor="middle" font-size="10" fill="#94A3B8" font-weight="600">対人志向</text>',
-    '<text x="261" y="133" text-anchor="middle" font-size="10" fill="#94A3B8" font-weight="600">対課題志向</text>',
+    '<text x="3" y="133" text-anchor="start" font-size="10" fill="#94A3B8" font-weight="600">対人志向</text>',
+    '<text x="277" y="133" text-anchor="end" font-size="10" fill="#94A3B8" font-weight="600">対課題志向</text>',
   ];
 
   // 非アクティブタイプのドット
