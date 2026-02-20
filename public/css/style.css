@@ -699,13 +699,12 @@ body {
 /* ---------- USER INFO SCREEN ---------- */
 #screen-userinfo {
   background: linear-gradient(160deg, #EFF6FF 0%, #DBEAFE 60%, #BFDBFE 100%);
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
 }
 
 #screen-userinfo.active {
   display: flex;
+  align-items: flex-start;
+  justify-content: center;
 }
 
 .userinfo-inner {
