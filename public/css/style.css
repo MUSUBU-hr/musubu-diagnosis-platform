@@ -65,13 +65,12 @@ body {
 /* ---------- START SCREEN ---------- */
 #screen-start {
   background: linear-gradient(160deg, #EFF6FF 0%, #DBEAFE 60%, #BFDBFE 100%);
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
 }
 
 #screen-start.active {
   display: flex;
+  align-items: flex-start;
+  justify-content: center;
 }
 
 .start-inner {
@@ -143,7 +142,7 @@ body {
   top: 0;
   z-index: 10;
   background-color: var(--color-surface);
-  padding: 14px 20px;
+  padding: 8px 20px;
   border-bottom: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
 }
@@ -157,7 +156,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
 }
 
 .progress-block {
