@@ -474,10 +474,10 @@ function buildMapSVG(activeKey) {
     '<line x1="140" y1="16" x2="140" y2="244" stroke="#CBD5E1" stroke-width="1.5"/>',
     '<line x1="26" y1="130" x2="254" y2="130" stroke="#CBD5E1" stroke-width="1.5"/>',
     // 軸ラベル
-    '<text x="140" y="11" text-anchor="middle" font-size="9" fill="#94A3B8" font-weight="600">変化志向</text>',
-    '<text x="140" y="255" text-anchor="middle" font-size="9" fill="#94A3B8" font-weight="600">安定志向</text>',
-    '<text x="18" y="133" text-anchor="middle" font-size="8" fill="#94A3B8" font-weight="600">対人志向</text>',
-    '<text x="262" y="133" text-anchor="middle" font-size="8" fill="#94A3B8" font-weight="600">対課題志向</text>',
+    '<text x="140" y="13" text-anchor="middle" font-size="12" fill="#94A3B8" font-weight="600">変化志向</text>',
+    '<text x="140" y="257" text-anchor="middle" font-size="12" fill="#94A3B8" font-weight="600">安定志向</text>',
+    '<text x="19" y="133" text-anchor="middle" font-size="11" fill="#94A3B8" font-weight="600">対人志向</text>',
+    '<text x="261" y="133" text-anchor="middle" font-size="11" fill="#94A3B8" font-weight="600">対課題志向</text>',
   ];
 
   // 非アクティブタイプのドット
@@ -487,7 +487,7 @@ function buildMapSVG(activeKey) {
     lines.push(
       '<circle cx="' + t.mapX + '" cy="' + t.mapY + '" r="14" fill="' + t.color + '" opacity="0.15"/>',
       '<circle cx="' + t.mapX + '" cy="' + t.mapY + '" r="8" fill="' + t.color + '" opacity="0.35"/>',
-      '<text x="' + t.mapX + '" y="' + (t.mapY + 22) + '" text-anchor="middle" font-size="8" fill="' + t.color + '" font-weight="600">' + t.label.replace('タイプ', '') + '</text>'
+      '<text x="' + t.mapX + '" y="' + (t.mapY + 24) + '" text-anchor="middle" font-size="11" fill="' + t.color + '" font-weight="600">' + t.label.replace('タイプ', '') + '</text>'
     );
   });
 
@@ -496,8 +496,8 @@ function buildMapSVG(activeKey) {
   lines.push(
     '<circle cx="' + a.mapX + '" cy="' + a.mapY + '" r="24" fill="' + a.color + '" opacity="0.15"><animate attributeName="r" values="20;28;20" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.2;0.05;0.2" dur="2s" repeatCount="indefinite"/></circle>',
     '<circle cx="' + a.mapX + '" cy="' + a.mapY + '" r="16" fill="' + a.color + '"/>',
-    '<text x="' + a.mapX + '" y="' + (a.mapY + 5) + '" text-anchor="middle" font-size="11" fill="#fff" font-weight="900">★</text>',
-    '<text x="' + a.mapX + '" y="' + (a.mapY + 28) + '" text-anchor="middle" font-size="9" fill="' + a.color + '" font-weight="700">あなた</text>'
+    '<text x="' + a.mapX + '" y="' + (a.mapY + 5) + '" text-anchor="middle" font-size="12" fill="#fff" font-weight="900">★</text>',
+    '<text x="' + a.mapX + '" y="' + (a.mapY + 30) + '" text-anchor="middle" font-size="12" fill="' + a.color + '" font-weight="700">あなた</text>'
   );
 
   return '<svg class="axis-map-svg" viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">'

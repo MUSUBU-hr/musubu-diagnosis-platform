@@ -512,10 +512,8 @@ body {
 }
 
 .result-card-title {
-  font-size: 12px;
+  font-size: 24px;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--color-accent-dark);
   margin-bottom: 16px;
 }
