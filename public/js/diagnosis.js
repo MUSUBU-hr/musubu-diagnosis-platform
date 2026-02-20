@@ -267,7 +267,9 @@ function renderBlock(blockNum) {
   const container = document.getElementById('questions-block' + blockNum);
   if (!container) return;
 
-  container.innerHTML = blockQuestions.map(function (q) {
+  var blockOffset = (blockNum - 1) * BLOCK_SIZE;
+  container.innerHTML = blockQuestions.map(function (q, idx) {
+    var displayNum = blockOffset + idx + 1;
     var scaleOptions = [1, 2, 3, 4, 5].map(function (val) {
       return [
         '<label class="scale-label">',
@@ -279,7 +281,7 @@ function renderBlock(blockNum) {
 
     return [
       '<div class="question-card" data-qid="' + q.id + '">',
-        '<p class="question-number">Q' + q.id + '</p>',
+        '<p class="question-number">Q' + displayNum + '</p>',
         '<p class="question-text">' + escapeHtml(q.text) + '</p>',
         '<div class="scale-group">',
           '<div class="scale-ends">',
@@ -324,7 +326,7 @@ function escapeHtml(str) {
 // ========================================
 function validateBlock(blockNum) {
   const startIdx = (blockNum - 1) * BLOCK_SIZE;
-  const blockQuestions = QUESTIONS.slice(startIdx, startIdx + BLOCK_SIZE);
+  const blockQuestions = _shuffledQuestions.slice(startIdx, startIdx + BLOCK_SIZE);
   const unanswered = [];
 
   blockQuestions.forEach(function (q) {
@@ -608,7 +610,20 @@ async function analyzeWithLLM(name, mainType, subType, scores, answers) {
     var analysisEl = document.getElementById('result-analysis');
     if (analysisEl) {
       if (data.analysis) {
-        analysisEl.innerHTML = '<p class="analysis-text">' + escapeHtml(data.analysis) + '</p>';
+        var html = '<p class="analysis-text">' + escapeHtml(data.analysis) + '</p>';
+        if (data.weapon) {
+          html += '<div class="analysis-item"><span class="analysis-item-label">⚔️ あなたの武器</span>'
+               +  '<p class="analysis-item-text">' + escapeHtml(data.weapon) + '</p></div>';
+        }
+        if (data.environment) {
+          html += '<div class="analysis-item"><span class="analysis-item-label">🌱 イキイキする環境</span>'
+               +  '<p class="analysis-item-text">' + escapeHtml(data.environment) + '</p></div>';
+        }
+        if (data.motivation) {
+          html += '<div class="analysis-item"><span class="analysis-item-label">🔥 モチベーションが上がるスイッチ</span>'
+               +  '<p class="analysis-item-text">' + escapeHtml(data.motivation) + '</p></div>';
+        }
+        analysisEl.innerHTML = html;
       } else {
         analysisEl.innerHTML = '<p class="analysis-text" style="color:var(--color-text-sub)">分析を取得できませんでした。</p>';
       }
@@ -688,19 +703,28 @@ async function analyzeWithLLM(name, mainType, subType, scores, answers) {
 // 氏名送信
 // ========================================
 async function submitUserInfo() {
-  var nameInput = document.getElementById('input-name');
-  var errorEl  = document.getElementById('userinfo-error');
-  var name = nameInput ? nameInput.value.trim() : '';
+  var lastInput  = document.getElementById('input-last-name');
+  var firstInput = document.getElementById('input-first-name');
+  var errorEl    = document.getElementById('userinfo-error');
 
-  if (!name) {
-    nameInput.classList.add('error');
-    errorEl.textContent = '氏名を入力してください。';
+  var lastName  = lastInput  ? lastInput.value.trim()  : '';
+  var firstName = firstInput ? firstInput.value.trim() : '';
+
+  // バリデーション
+  var hasError = false;
+  if (!lastName)  { lastInput.classList.add('error');  hasError = true; }
+  if (!firstName) { firstInput.classList.add('error'); hasError = true; }
+  if (hasError) {
+    errorEl.textContent = '姓と名を入力してください。';
     errorEl.style.display = 'block';
     return;
   }
 
-  nameInput.classList.remove('error');
+  lastInput.classList.remove('error');
+  firstInput.classList.remove('error');
   errorEl.style.display = 'none';
+
+  var name = lastName + ' ' + firstName;
 
   var answers    = getAnswers();
   var scores     = calculateScores(answers);
@@ -708,13 +732,19 @@ async function submitUserInfo() {
   var subTypeKey = calculateSubType(scores, typeKey);
   renderResult(typeKey, subTypeKey, scores);
 
+  // 結果画面の氏名を反映
+  var nameEl = document.getElementById('result-name');
+  if (nameEl) nameEl.textContent = name;
+  var nameAnalysisEl = document.getElementById('result-name-analysis');
+  if (nameAnalysisEl) nameAnalysisEl.textContent = name;
+
   var progress = loadProgress();
   if (progress) {
-    progress.completed     = true;
-    progress.name          = name;
-    progress.result_type   = typeKey;
+    progress.completed      = true;
+    progress.name           = name;
+    progress.result_type    = typeKey;
     progress.result_subtype = subTypeKey;
-    progress.result_scores = scores;
+    progress.result_scores  = scores;
     saveProgress(progress);
     apiUpdateSession(progress.session_id, { completed: true, name: name, result_type: typeKey });
   }
@@ -855,15 +885,17 @@ document.addEventListener('DOMContentLoaded', function () {
     btnUserInfo.addEventListener('click', submitUserInfo);
   }
 
-  // 氏名入力フィールドのエラー解除
-  var inputName = document.getElementById('input-name');
-  if (inputName) {
-    inputName.addEventListener('input', function () {
-      inputName.classList.remove('error');
-      var errorEl = document.getElementById('userinfo-error');
-      if (errorEl) errorEl.style.display = 'none';
-    });
-  }
+  // 姓・名入力フィールドのエラー解除
+  ['input-last-name', 'input-first-name'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', function () {
+        el.classList.remove('error');
+        var errorEl = document.getElementById('userinfo-error');
+        if (errorEl) errorEl.style.display = 'none';
+      });
+    }
+  });
 
   // 初期化
   init();

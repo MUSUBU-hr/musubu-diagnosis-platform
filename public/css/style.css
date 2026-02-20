@@ -174,7 +174,7 @@ body {
 
 /* ---------- QUESTIONS CONTAINER ---------- */
 .questions-container {
-  padding: 20px 16px;
+  padding: 4px 16px 20px;
   max-width: 640px;
   margin: 0 auto;
 }
@@ -392,8 +392,9 @@ body {
 }
 
 .result-title-label {
-  font-size: 15px;
-  opacity: 0.85;
+  font-size: 22px;
+  font-weight: 700;
+  opacity: 0.9;
   margin-bottom: 4px;
 }
 
@@ -593,6 +594,30 @@ body {
   line-height: 1.9;
   color: var(--color-text);
   white-space: pre-wrap;
+  margin-bottom: 20px;
+}
+
+.analysis-item {
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-top: 12px;
+}
+
+.analysis-item-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin-bottom: 6px;
+  letter-spacing: 0.03em;
+}
+
+.analysis-item-text {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--color-text);
+  margin: 0;
 }
 
 /* ---- Advisor Memo ---- */
@@ -685,6 +710,16 @@ body {
   text-align: left;
 }
 
+.form-group-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 0;
+}
+
+.form-group-row .form-group {
+  flex: 1;
+}
+
 .form-group {
   margin-bottom: 20px;
 }
@@ -717,6 +752,13 @@ body {
 
 .form-input.error {
   border-color: var(--color-error);
+}
+
+.userinfo-note {
+  font-size: 12px;
+  color: var(--color-text-sub);
+  margin-bottom: 20px;
+  line-height: 1.6;
 }
 
 /* ---------- VALIDATION ERROR ---------- */

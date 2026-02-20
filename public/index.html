@@ -20,7 +20,7 @@
       <ul class="start-features">
         <li>✓ 全5ブロック・各10問</li>
         <li>✓ 途中で中断しても再開OK</li>
-        <li>✓ 診断後にLINEで詳細を確認</li>
+        <li>✓ 診断後に結果をすぐ確認</li>
       </ul>
       <button id="btn-start" class="btn btn-primary btn-large">診断をはじめる</button>
     </div>
@@ -125,13 +125,20 @@
   <div id="screen-userinfo" class="screen">
     <div class="userinfo-inner">
       <div class="result-badge">あと少し！</div>
-      <h2 class="userinfo-title">診断結果を受け取るために<br>お名前を教えてください</h2>
-      <p class="userinfo-desc">入力いただいた情報は診断結果のご案内にのみ使用します。</p>
+      <h2 class="userinfo-title">診断結果は、お名前のご入力後<br>すぐに表示されます。</h2>
+      <p class="userinfo-desc">あなた専用の結果ページを作成するため、<br>姓名をご入力ください。</p>
       <div class="userinfo-form">
-        <div class="form-group">
-          <label class="form-label" for="input-name">氏名</label>
-          <input type="text" id="input-name" class="form-input" placeholder="例：山田 太郎" autocomplete="name">
+        <div class="form-group-row">
+          <div class="form-group">
+            <label class="form-label" for="input-last-name">姓</label>
+            <input type="text" id="input-last-name" class="form-input" placeholder="例：山田" autocomplete="family-name">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="input-first-name">名</label>
+            <input type="text" id="input-first-name" class="form-input" placeholder="例：太郎" autocomplete="given-name">
+          </div>
         </div>
+        <p class="userinfo-note">面談をご希望の場合、診断結果と照合するために使用することがあります。</p>
         <p id="userinfo-error" class="validation-msg" style="display:none;"></p>
         <button id="btn-submit-userinfo" class="btn btn-primary btn-large">診断結果を見る</button>
       </div>
@@ -145,7 +152,7 @@
       <div class="result-hero-inner">
         <div class="result-badge-white">診断完了</div>
         <div class="result-emoji" id="result-emoji"></div>
-        <p class="result-title-label">あなたは</p>
+        <p class="result-title-label"><span id="result-name"></span>さんは</p>
         <div class="result-type-name" id="result-type-name"></div>
         <p class="result-tagline" id="result-tagline"></p>
         <div class="result-subtype" id="result-subtype"></div>
@@ -169,7 +176,7 @@
 
       <!-- AI 個別分析 -->
       <div class="result-card">
-        <div class="result-card-title">✨ AI 個別分析</div>
+        <div class="result-card-title">✨ <span id="result-name-analysis"></span>さんの個別分析</div>
         <div id="result-analysis">
           <div class="analysis-loading">
             <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
@@ -195,18 +202,7 @@
         </div>
       </div>
 
-      <!-- LINE CTA -->
-      <div class="result-cta-wrap">
-        <p class="result-cta-text">
-          あなたのタイプに合った具体的な職種や<br>キャリアプランをLINEでお伝えします！
-        </p>
-        <a href="#line-register" class="btn btn-line btn-large">
-          <span class="line-icon">LINE</span>
-          LINEで詳細を受け取る
-        </a>
-      </div>
-
-      <button id="btn-restart" class="btn btn-secondary">もう一度診断する</button>
+<button id="btn-restart" class="btn btn-secondary">もう一度診断する</button>
     </div>
   </div>
 

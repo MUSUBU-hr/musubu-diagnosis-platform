@@ -81,7 +81,7 @@ app.get('/api/sessions/:id', async (req, res) => {
 // ========================================
 app.patch('/api/sessions/:id', async (req, res) => {
   try {
-    const { max_block, completed, name, result_type } = req.body;
+    const { max_block, completed, name, line_name, result_type } = req.body;
 
     const docRef = firestore.collection(COLLECTION).doc(req.params.id);
     const doc = await docRef.get();
@@ -104,6 +104,10 @@ app.patch('/api/sessions/:id', async (req, res) => {
 
     if (typeof name === 'string' && name.trim()) {
       updates.name = name.trim();
+    }
+
+    if (typeof line_name === 'string') {
+      updates.line_name = line_name;
     }
 
     if (typeof result_type === 'string' && result_type) {
@@ -154,7 +158,7 @@ ${scoresText}
 【全設問への回答（1=まったくそう思わない、5=とてもそう思う）】
 ${qaText}
 
-以下の2つをJSON形式のみで出力してください（マークダウン・コードブロック不要）。
+以下をJSON形式のみで出力してください（マークダウン・コードブロック不要）。
 
 ---
 
@@ -165,7 +169,20 @@ ${name}さん本人に向けた個別分析コメント（200〜250字）。
 ・スコアや回答傾向をもとに、この人ならではの具体的な強みや仕事スタイルを描写する
 ・「診断結果として〜」のような無機質な表現は使わない
 
-2. "advisor_memo"
+2. "weapon"
+${name}さんの「あなたの武器」（1〜2文・簡潔に）。
+・この人が自然に発揮できる最大の強みを具体的に表現する
+・スコアや回答傾向を根拠にする
+
+3. "environment"
+${name}さんの「イキイキする環境」（1〜2文・簡潔に）。
+・どんな職場・状況でパフォーマンスが最大化するかを具体的に表現する
+
+4. "motivation"
+${name}さんの「モチベーションが上がるスイッチ」（1〜2文・簡潔に）。
+・何がやる気の源泉になるか、どんな状況で燃えるかを具体的に表現する
+
+5. "advisor_memo"
 キャリアアドバイザー向けの面談メモ。以下の8項目を必ず含め、各項目を「■項目名」で始めること。
 
 ■タイプ
@@ -181,7 +198,7 @@ ${name}さん本人に向けた個別分析コメント（200〜250字）。
 
 ---
 
-{"analysis": "...", "advisor_memo": "..."}`;
+{"analysis": "...", "weapon": "...", "environment": "...", "motivation": "...", "advisor_memo": "..."}`;
 
     const client = new Anthropic();
     const message = await client.messages.create({
@@ -196,11 +213,14 @@ ${name}さん本人に向けた個別分析コメント（200〜250字）。
 
     res.json({
       analysis:     parsed.analysis     || null,
+      weapon:       parsed.weapon       || null,
+      environment:  parsed.environment  || null,
+      motivation:   parsed.motivation   || null,
       advisor_memo: parsed.advisor_memo || null,
     });
   } catch (err) {
     console.error('POST /api/analyze error:', err);
-    res.json({ analysis: null, advisor_memo: null });
+    res.json({ analysis: null, weapon: null, environment: null, motivation: null, advisor_memo: null });
   }
 });
 
