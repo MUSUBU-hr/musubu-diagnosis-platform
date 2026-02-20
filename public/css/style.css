@@ -468,9 +468,21 @@ body {
   overflow: hidden;
 }
 
-.ai-card-badge-row {
-  padding: 16px 20px 0;
-  text-align: left;
+.ai-main-section {
+  padding: 20px 20px 16px;
+}
+
+.ai-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.ai-title-row .result-card-title {
+  margin-bottom: 0;
+  flex: 1;
 }
 
 .ai-card-badge {
@@ -482,23 +494,28 @@ body {
   letter-spacing: 0.06em;
   padding: 3px 12px;
   border-radius: 999px;
+  flex-shrink: 0;
 }
 
-.ai-section {
-  padding: 12px 20px 16px;
+.ai-sub-section {
+  background: rgba(126, 191, 187, 0.05);
+  border-top: 1px solid rgba(126, 191, 187, 0.2);
+  padding: 16px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.ai-section-title {
-  font-size: 16px;
+.ai-sub-item {
+  border-left: 3px solid var(--color-accent);
+  padding-left: 14px;
+}
+
+.ai-sub-title {
+  font-size: 13px;
   font-weight: 700;
   color: var(--color-accent-dark);
-  margin-bottom: 10px;
-}
-
-.ai-section-divider {
-  height: 1px;
-  background: var(--color-border);
-  margin: 0 20px;
+  margin-bottom: 6px;
 }
 
 .type-card {
@@ -792,7 +809,7 @@ body {
   line-height: 1.9;
   color: var(--color-text);
   white-space: pre-wrap;
-  margin-bottom: 20px;
+  margin-bottom: 4px;
 }
 
 .analysis-item {
