@@ -232,6 +232,23 @@ async function apiGetSession(sessionId) {
 }
 
 // ========================================
+// イベント計測（失敗はサイレントに無視）
+// ========================================
+function trackEvent(eventName) {
+  try {
+    var progress = loadProgress();
+    fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event: eventName,
+        session_id: progress ? (progress.session_id || '') : '',
+      }),
+    });
+  } catch (e) { /* サイレントに無視 */ }
+}
+
+// ========================================
 // 画面切り替え
 // ========================================
 function showScreen(screenId) {
@@ -399,9 +416,12 @@ function submitBlock(blockNum) {
   }
 
   if (blockNum < TOTAL_BLOCKS) {
+    trackEvent('block_reach_' + (blockNum + 1));
     goToBlock(blockNum + 1);
   } else {
     // Block5 完了 → 氏名入力画面
+    trackEvent('questions_complete');
+    trackEvent('userinfo_view');
     var progress = loadProgress();
     if (progress) {
       progress.max_block = TOTAL_BLOCKS;
@@ -758,6 +778,7 @@ async function submitUserInfo() {
   // LLM分析（非同期・結果画面表示後に更新）
   analyzeWithLLM(name, typeKey, subTypeKey, scores, answers);
 
+  trackEvent('result_view');
   showScreen('screen-result');
 }
 
@@ -765,6 +786,8 @@ async function submitUserInfo() {
 // 診断開始
 // ========================================
 async function startDiagnosis() {
+  trackEvent('diagnosis_start');
+  trackEvent('block_reach_1');
   // APIでセッションを作成し、session_idを取得（失敗時はローカルUUIDを使用）
   var apiSessionId = await apiCreateSession();
 
@@ -798,6 +821,7 @@ function restartDiagnosis() {
 // 初期化
 // ========================================
 async function init() {
+  trackEvent('page_view');
   var progress = loadProgress();
 
   if (!progress) {
@@ -902,6 +926,14 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
   });
+
+  // 面談CTAクリック計測
+  var ctaBtn = document.querySelector('.cta-banner-btn');
+  if (ctaBtn) {
+    ctaBtn.addEventListener('click', function () {
+      trackEvent('cta_click');
+    });
+  }
 
   // 初期化
   init();

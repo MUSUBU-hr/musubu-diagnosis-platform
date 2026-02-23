@@ -46,4 +46,4 @@ jobs:
             --region "${{ env.REGION }}" \
             --project "${{ env.PROJECT_ID }}" \
             --allow-unauthenticated \
-            --set-secrets="ANTHROPIC_API_KEY=ANTHROPIC_API_KEY:latest"
+            --set-secrets="ANTHROPIC_API_KEY=ANTHROPIC_API_KEY:latest,ADMIN_PASSWORD=ADMIN_PASSWORD:latest"
