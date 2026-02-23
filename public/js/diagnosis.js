@@ -728,6 +728,7 @@ async function analyzeWithLLM(name, mainType, subType, scores, answers) {
               main_type: mainType,
               sub_type: subType,
               scores: scores,
+              analysis: data.analysis,
               advisor_memo: data.advisor_memo,
             }),
           });

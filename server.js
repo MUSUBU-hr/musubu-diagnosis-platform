@@ -237,7 +237,7 @@ app.post('/api/send-result', async (req, res) => {
   }
 
   try {
-    const { name, main_type, sub_type, scores, advisor_memo } = req.body;
+    const { name, main_type, sub_type, scores, analysis, advisor_memo } = req.body;
     if (!name || !main_type) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
@@ -255,6 +255,10 @@ app.post('/api/send-result', async (req, res) => {
              + '<td style="padding:4px 0;font-weight:700;color:#111">' + Number(v).toFixed(1) + ' / 5</td></tr>';
       }).join('');
 
+    const analysisHtml = analysis
+      ? analysis.replace(/\n/g, '<br>')
+      : '（取得できませんでした）';
+
     const memoHtml = advisor_memo
       ? advisor_memo.replace(/\n/g, '<br>')
       : '（取得できませんでした）';
@@ -262,7 +266,7 @@ app.post('/api/send-result', async (req, res) => {
     const html = [
       '<div style="font-family:sans-serif;max-width:600px;margin:0 auto;color:#111">',
       '<div style="background:#7EBFBB;padding:20px 24px;border-radius:8px 8px 0 0">',
-      '<h1 style="color:#fff;font-size:18px;margin:0">MUSUBU 適職診断 結果レポート</h1>',
+      '<h1 style="color:#fff;font-size:18px;margin:0">MUSUBU キャリアタイプ診断 結果レポート</h1>',
       '</div>',
       '<div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">',
       '<table style="margin-bottom:20px;width:100%">',
@@ -273,6 +277,8 @@ app.post('/api/send-result', async (req, res) => {
       '</table>',
       '<h2 style="font-size:14px;border-bottom:2px solid #e5e7eb;padding-bottom:8px;margin-bottom:12px">タイプ別スコア</h2>',
       '<table style="margin-bottom:24px">' + scoresHtml + '</table>',
+      '<h2 style="font-size:14px;border-bottom:2px solid #e5e7eb;padding-bottom:8px;margin-bottom:12px">' + name + 'さんの分析結果</h2>',
+      '<div style="background:#f0fafa;border-left:4px solid #7EBFBB;border-radius:0 6px 6px 0;padding:16px;font-size:13px;line-height:1.8;margin-bottom:24px">' + analysisHtml + '</div>',
       '<h2 style="font-size:14px;border-bottom:2px solid #e5e7eb;padding-bottom:8px;margin-bottom:12px">キャリアアドバイザー用メモ</h2>',
       '<div style="background:#f9fafb;border-radius:6px;padding:16px;font-size:13px;line-height:1.8;white-space:pre-wrap">' + memoHtml + '</div>',
       '</div>',
