@@ -302,6 +302,37 @@ body {
   background-color: #D9EFEE;
 }
 
+/* ---------- RESTART BANNER ---------- */
+.restart-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #FEF9EC;
+  border-bottom: 1px solid #F3E6B0;
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--color-text-sub);
+}
+
+.restart-banner-btn {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: var(--color-text-sub);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+
+.restart-banner-btn:hover {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
 /* ---------- BLOCK FOOTER ---------- */
 .block-footer {
   padding: 16px 16px 40px;

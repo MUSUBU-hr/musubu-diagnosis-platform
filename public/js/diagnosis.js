@@ -269,6 +269,7 @@ function showScreen(screenId) {
 // 全50問をシャッフルして5分割したものを保持
 // ========================================
 var _shuffledQuestions = null;
+var _showRestartBanner = false;  // 再開時に「最初からやり直す」を表示するフラグ
 
 function buildShuffledQuestions() {
   _shuffledQuestions = QUESTIONS.slice();
@@ -408,6 +409,31 @@ function goToBlock(blockNum) {
     apiUpdateSession(progress.session_id, { max_block: progress.max_block });
   }
   showScreen('screen-block' + blockNum);
+
+  // 再開時のみ「最初からやり直す」バナーを表示
+  if (_showRestartBanner) {
+    _showRestartBanner = false;
+    var screen = document.getElementById('screen-block' + blockNum);
+    if (screen) {
+      var existing = screen.querySelector('.restart-banner');
+      if (existing) existing.remove();
+      var banner = document.createElement('div');
+      banner.className = 'restart-banner';
+      var answeredCount = (blockNum - 1) * BLOCK_SIZE;
+      banner.innerHTML =
+        '<span>Q' + answeredCount + ' / Q50 回答済</span>' +
+        '<button class="restart-banner-btn" id="btn-restart-banner">↩ 最初からやり直す</button>';
+      var header = screen.querySelector('.block-header');
+      if (header) {
+        header.insertAdjacentElement('afterend', banner);
+      }
+      document.getElementById('btn-restart-banner').addEventListener('click', function () {
+        if (confirm('最初からやり直すと、これまでの回答がリセットされます。よろしいですか？')) {
+          restartDiagnosis();
+        }
+      });
+    }
+  }
 }
 
 function submitBlock(blockNum) {
@@ -904,6 +930,7 @@ async function init() {
   }
 
   // 途中から再開
+  _showRestartBanner = true;
   renderAllBlocks();
   goToBlock(progress.max_block);
 }
