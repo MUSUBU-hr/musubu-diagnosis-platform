@@ -1,7 +1,7 @@
 'use strict';
 
 const express = require('express');
-const { Firestore } = require('@google-cloud/firestore');
+const { Firestore, FieldValue } = require('@google-cloud/firestore');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const Anthropic = require('@anthropic-ai/sdk');
@@ -242,7 +242,7 @@ app.post('/api/track', async (req, res) => {
   try {
     const ref = firestore.collection('analytics').doc('counters');
     await ref.set(
-      { [event]: Firestore.FieldValue.increment(1), updated_at: Firestore.Timestamp.now() },
+      { [event]: FieldValue.increment(1), updated_at: Firestore.Timestamp.now() },
       { merge: true }
     );
     res.json({ ok: true });
