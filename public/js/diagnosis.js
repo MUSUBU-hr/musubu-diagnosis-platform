@@ -691,6 +691,9 @@ async function analyzeWithLLM(name, mainType, subType, scores, answers) {
       var progress = loadProgress();
       if (progress) {
         progress.analysis     = data.analysis;
+        progress.weapon       = data.weapon;
+        progress.environment  = data.environment;
+        progress.motivation   = data.motivation;
         progress.advisor_memo = data.advisor_memo;
         saveProgress(progress);
       }
@@ -844,10 +847,17 @@ async function init() {
     if (progress.result_type) {
       renderResult(progress.result_type, progress.result_subtype || null, progress.result_scores || null);
       // 保存済み分析を復元
+      var na = '<p class="analysis-item-text" style="color:var(--color-text-sub)">-</p>';
       if (progress.analysis) {
         var el = document.getElementById('result-analysis');
         if (el) el.innerHTML = '<p class="analysis-text">' + escapeHtml(progress.analysis) + '</p>';
       }
+      var weaponEl = document.getElementById('result-weapon');
+      if (weaponEl) weaponEl.innerHTML = progress.weapon ? '<p class="analysis-item-text">' + escapeHtml(progress.weapon) + '</p>' : na;
+      var envEl = document.getElementById('result-environment');
+      if (envEl) envEl.innerHTML = progress.environment ? '<p class="analysis-item-text">' + escapeHtml(progress.environment) + '</p>' : na;
+      var motivEl = document.getElementById('result-motivation');
+      if (motivEl) motivEl.innerHTML = progress.motivation ? '<p class="analysis-item-text">' + escapeHtml(progress.motivation) + '</p>' : na;
     }
     showScreen('screen-result');
     return;
