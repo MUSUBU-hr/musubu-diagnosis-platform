@@ -397,9 +397,9 @@ function buildAdminHtml(data, period, from, to) {
            '<text x="' + (PL - 6) + '" y="' + (Number(y) + 4) + '" text-anchor="end" font-size="10" fill="#9CA3AF">' + fmt(v) + '</text>';
   }).join('');
 
-  // X 軸ラベル（Q1, Q10, Q20, Q30, Q40, Q50）
-  const xLabelsHtml = [1,10,20,30,40,50].map(q =>
-    '<text x="' + qx(q) + '" y="' + (PT + PH + 18) + '" text-anchor="middle" font-size="11" fill="#6B7280">Q' + q + '</text>'
+  // X 軸ラベル（5問刻み: Q1, Q5, Q10 ... Q50）
+  const xLabelsHtml = [1,5,10,15,20,25,30,35,40,45,50].map(q =>
+    '<text x="' + qx(q) + '" y="' + (PT + PH + 18) + '" text-anchor="middle" font-size="10" fill="#6B7280">Q' + q + '</text>'
   ).join('');
 
   // Block 境界の縦線（薄いガイド線）
@@ -414,10 +414,10 @@ function buildAdminHtml(data, period, from, to) {
     return '<text x="' + mx + '" y="' + (PT - 8) + '" text-anchor="middle" font-size="10" fill="#9CA3AF">Block ' + (i + 1) + '</text>';
   }).join('');
 
-  // データポイント（Q10, Q20, Q30, Q40, Q50 のみ可視ドット）
-  const dotsHtml = [10,20,30,40,50].map(q => {
+  // データポイント（5問刻みで可視ドット）
+  const dotsHtml = [5,10,15,20,25,30,35,40,45,50].map(q => {
     const v = qVals[q - 1];
-    return '<circle cx="' + qx(q) + '" cy="' + vy(v) + '" r="4" fill="#7EBFBB" stroke="#fff" stroke-width="1.5"/>';
+    return '<circle cx="' + qx(q) + '" cy="' + vy(v) + '" r="3" fill="#7EBFBB" stroke="#fff" stroke-width="1.5"/>';
   }).join('');
 
   // 全50問: 透明なヒットエリア + SVGネイティブtooltip
@@ -426,13 +426,30 @@ function buildAdminHtml(data, period, from, to) {
     return '<circle cx="' + qx(q) + '" cy="' + vy(v) + '" r="6" fill="transparent" stroke="none"><title>Q' + q + ': ' + fmt(v) + '件</title></circle>';
   }).join('');
 
+  // 急落ポイント上位3つを自動検出してラベル表示
+  const dropPoints = qVals.slice(1)
+    .map((v, i) => ({ q: i + 2, drop: v - qVals[i], val: v }))
+    .filter(d => d.drop < 0)
+    .sort((a, b) => a.drop - b.drop)
+    .slice(0, 3);
+  const dropLabelHtml = dropPoints.map(d => {
+    const cx = qx(d.q);
+    const cy = Number(vy(d.val));
+    return [
+      '<circle cx="' + cx + '" cy="' + cy + '" r="4" fill="#EF4444" stroke="#fff" stroke-width="1.5"/>',
+      '<line x1="' + cx + '" y1="' + (cy - 5) + '" x2="' + cx + '" y2="' + (cy - 16) + '" stroke="#EF4444" stroke-width="1.5"/>',
+      '<rect x="' + (Number(cx) - 14) + '" y="' + (cy - 30) + '" width="28" height="14" rx="3" fill="#EF4444"/>',
+      '<text x="' + cx + '" y="' + (cy - 20) + '" text-anchor="middle" font-size="10" fill="#fff" font-weight="700">Q' + d.q + '</text>',
+    ].join('');
+  }).join('');
+
   const lineSvg =
     '<svg viewBox="0 0 ' + CW + ' ' + CH + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:' + CW + 'px;display:block">' +
     yTicksHtml + blockGuideHtml + blockLabelHtml +
     '<line x1="' + PL + '" y1="' + PT + '" x2="' + PL + '" y2="' + (PT + PH) + '" stroke="#E5E7EB" stroke-width="1"/>' +
     '<line x1="' + PL + '" y1="' + (PT + PH) + '" x2="' + (PL + PW) + '" y2="' + (PT + PH) + '" stroke="#E5E7EB" stroke-width="1"/>' +
     '<polyline points="' + polyPts.join(' ') + '" fill="none" stroke="#7EBFBB" stroke-width="2" stroke-linejoin="round"/>' +
-    dotsHtml + tooltipHtml + xLabelsHtml +
+    dotsHtml + dropLabelHtml + tooltipHtml + xLabelsHtml +
     '</svg>';
 
   return '<!DOCTYPE html>' +
@@ -490,7 +507,8 @@ function buildAdminHtml(data, period, from, to) {
     '<section><h2>📉 設問別回答数（Q1〜Q50）</h2>' +
     '<p class="note">各設問に最初に回答した人数の推移です。急激に下がっている設問が離脱ポイントです。縦の点線はブロック境界を示します。</p>' +
     '<div class="legend">' +
-    '<span class="legend-dot" style="background:#7EBFBB"></span>回答数' +
+    '<span class="legend-dot" style="background:#7EBFBB"></span>回答数&nbsp;&nbsp;' +
+    '<span class="legend-dot" style="background:#EF4444"></span>急落上位3問（離脱ポイント候補）' +
     '</div>' +
     lineSvg + '</section>' +
     '</body></html>';
