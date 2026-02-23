@@ -235,13 +235,48 @@ const ALLOWED_EVENTS = new Set([
   'question_answered',
 ]);
 
+// JST の YYYY-MM-DD を返す（daysAgo=0 が今日）
+function getDateJST(daysAgo) {
+  const jst = new Date(Date.now() + 9 * 60 * 60 * 1000 - daysAgo * 24 * 60 * 60 * 1000);
+  return jst.toISOString().slice(0, 10);
+}
+
+// 期間指定で analytics ドキュメントを集計して返す
+async function getAnalyticsData(period) {
+  const col = firestore.collection('analytics');
+  let docs = [];
+
+  if (period === 'today') {
+    const doc = await col.doc(getDateJST(0)).get();
+    if (doc.exists) docs = [doc];
+  } else if (period === '7d' || period === '30d') {
+    const days = period === '7d' ? 7 : 30;
+    const dates = Array.from({ length: days }, (_, i) => getDateJST(i));
+    const snaps = await Promise.all(dates.map(d => col.doc(d).get()));
+    docs = snaps.filter(d => d.exists);
+  } else {
+    // 全期間: YYYY-MM-DD 形式のドキュメントをすべて集計
+    const snap = await col.get();
+    docs = snap.docs.filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d.id));
+  }
+
+  const data = {};
+  docs.forEach(doc => {
+    const d = doc.data();
+    Object.keys(d).forEach(key => {
+      if (key !== 'updated_at') data[key] = (data[key] || 0) + (Number(d[key]) || 0);
+    });
+  });
+  return data;
+}
+
 app.post('/api/track', async (req, res) => {
   const { event, question } = req.body;
   if (!ALLOWED_EVENTS.has(event)) {
     return res.status(400).json({ error: 'Unknown event' });
   }
   try {
-    const ref = firestore.collection('analytics').doc('counters');
+    const ref = firestore.collection('analytics').doc(getDateJST(0));
     let update = { updated_at: Firestore.Timestamp.now() };
 
     if (event === 'question_answered') {
@@ -266,13 +301,12 @@ app.post('/api/track', async (req, res) => {
 // GET /admin
 // 管理ダッシュボード（Basic 認証）
 // ========================================
-function buildAdminHtml(data) {
+function buildAdminHtml(data, period) {
+  period = period || 'all';
   const get = (key) => Number(data[key] || 0);
   const pct = (n, d) => d > 0 ? (n / d * 100).toFixed(1) + '%' : '—';
   const fmt = (n) => Number(n).toLocaleString('ja-JP');
-  const updatedAt = data.updated_at
-    ? data.updated_at.toDate().toLocaleString('ja-JP')
-    : '—';
+  const nowJST = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().replace('T', ' ').slice(0, 19);
 
   // ---- KPI カード ----
   const kpiData = [
@@ -367,10 +401,16 @@ function buildAdminHtml(data) {
     return '<text x="' + mx + '" y="' + (PT - 8) + '" text-anchor="middle" font-size="10" fill="#9CA3AF">Block ' + (i + 1) + '</text>';
   }).join('');
 
-  // データポイント（Q10, Q20, Q30, Q40, Q50 のみドット表示）
+  // データポイント（Q10, Q20, Q30, Q40, Q50 のみ可視ドット）
   const dotsHtml = [10,20,30,40,50].map(q => {
     const v = qVals[q - 1];
     return '<circle cx="' + qx(q) + '" cy="' + vy(v) + '" r="4" fill="#7EBFBB" stroke="#fff" stroke-width="1.5"/>';
+  }).join('');
+
+  // 全50問: 透明なヒットエリア + SVGネイティブtooltip
+  const tooltipHtml = qVals.map((v, i) => {
+    const q = i + 1;
+    return '<circle cx="' + qx(q) + '" cy="' + vy(v) + '" r="6" fill="transparent" stroke="none"><title>Q' + q + ': ' + fmt(v) + '件</title></circle>';
   }).join('');
 
   const lineSvg =
@@ -379,7 +419,7 @@ function buildAdminHtml(data) {
     '<line x1="' + PL + '" y1="' + PT + '" x2="' + PL + '" y2="' + (PT + PH) + '" stroke="#E5E7EB" stroke-width="1"/>' +
     '<line x1="' + PL + '" y1="' + (PT + PH) + '" x2="' + (PL + PW) + '" y2="' + (PT + PH) + '" stroke="#E5E7EB" stroke-width="1"/>' +
     '<polyline points="' + polyPts.join(' ') + '" fill="none" stroke="#7EBFBB" stroke-width="2" stroke-linejoin="round"/>' +
-    dotsHtml + xLabelsHtml +
+    dotsHtml + tooltipHtml + xLabelsHtml +
     '</svg>';
 
   return '<!DOCTYPE html>' +
@@ -401,9 +441,19 @@ function buildAdminHtml(data) {
     '.note{font-size:11px;color:#9CA3AF;margin-bottom:12px}' +
     '.legend{display:flex;gap:16px;margin-bottom:8px;font-size:11px;color:#6B7280;align-items:center}' +
     '.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}' +
+    '.period-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}' +
+    '.period-bar span{font-size:12px;color:#6B7280;margin-right:4px}' +
+    '.period-btn{padding:5px 14px;border-radius:20px;border:1.5px solid #D1D5DB;background:#fff;font-size:12px;color:#374151;cursor:pointer;text-decoration:none;line-height:1.4;transition:all .15s}' +
+    '.period-btn.active{background:#7EBFBB;border-color:#7EBFBB;color:#fff;font-weight:700}' +
     '</style></head><body>' +
     '<h1>MUSUBU 診断 管理ダッシュボード</h1>' +
-    '<p class="meta">最終更新: ' + updatedAt + ' &nbsp;|&nbsp; <a href="/admin" style="color:#7EBFBB">更新</a></p>' +
+    '<p class="meta">集計時刻: ' + nowJST + ' (JST) &nbsp;|&nbsp; <a href="/admin?period=' + period + '" style="color:#7EBFBB">更新</a></p>' +
+    '<div class="period-bar"><span>計測期間:</span>' +
+    ['today','7d','30d','all'].map(p => {
+      const labels = {today:'今日', '7d':'過去7日', '30d':'過去30日', all:'全期間'};
+      return '<a href="/admin?period=' + p + '" class="period-btn' + (period === p ? ' active' : '') + '">' + labels[p] + '</a>';
+    }).join('') +
+    '</div>' +
     '<div class="kpi-grid">' + kpiHtml + '</div>' +
     '<section><h2>📊 離脱ファネル</h2>' +
     '<div class="legend">' +
@@ -442,9 +492,9 @@ app.get('/admin', async (req, res) => {
   }
 
   try {
-    const doc  = await firestore.collection('analytics').doc('counters').get();
-    const data = doc.exists ? doc.data() : {};
-    res.send(buildAdminHtml(data));
+    const period = req.query.period || 'all';
+    const data   = await getAnalyticsData(period);
+    res.send(buildAdminHtml(data, period));
   } catch (err) {
     console.error('GET /admin error:', err);
     res.status(500).send('Internal server error');
