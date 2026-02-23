@@ -242,7 +242,7 @@ function getDateJST(daysAgo) {
 }
 
 // 期間指定で analytics ドキュメントを集計して返す
-async function getAnalyticsData(period) {
+async function getAnalyticsData(period, from, to) {
   const col = firestore.collection('analytics');
   let docs = [];
 
@@ -252,6 +252,17 @@ async function getAnalyticsData(period) {
   } else if (period === '7d' || period === '30d') {
     const days = period === '7d' ? 7 : 30;
     const dates = Array.from({ length: days }, (_, i) => getDateJST(i));
+    const snaps = await Promise.all(dates.map(d => col.doc(d).get()));
+    docs = snaps.filter(d => d.exists);
+  } else if (period === 'custom' && from && to && from <= to) {
+    // カスタム期間: from〜to の各日ドキュメントを集計
+    const dates = [];
+    let cur = new Date(from + 'T00:00:00Z');
+    const end = new Date(to + 'T00:00:00Z');
+    while (cur <= end) {
+      dates.push(cur.toISOString().slice(0, 10));
+      cur = new Date(cur.getTime() + 24 * 60 * 60 * 1000);
+    }
     const snaps = await Promise.all(dates.map(d => col.doc(d).get()));
     docs = snaps.filter(d => d.exists);
   } else {
@@ -301,8 +312,10 @@ app.post('/api/track', async (req, res) => {
 // GET /admin
 // 管理ダッシュボード（Basic 認証）
 // ========================================
-function buildAdminHtml(data, period) {
+function buildAdminHtml(data, period, from, to) {
   period = period || 'all';
+  from = from || '';
+  to   = to   || '';
   const get = (key) => Number(data[key] || 0);
   const pct = (n, d) => d > 0 ? (n / d * 100).toFixed(1) + '%' : '—';
   const fmt = (n) => Number(n).toLocaleString('ja-JP');
@@ -445,14 +458,27 @@ function buildAdminHtml(data, period) {
     '.period-bar span{font-size:12px;color:#6B7280;margin-right:4px}' +
     '.period-btn{padding:5px 14px;border-radius:20px;border:1.5px solid #D1D5DB;background:#fff;font-size:12px;color:#374151;cursor:pointer;text-decoration:none;line-height:1.4;transition:all .15s}' +
     '.period-btn.active{background:#7EBFBB;border-color:#7EBFBB;color:#fff;font-weight:700}' +
+    '.date-form{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px}' +
+    '.date-form input[type=date]{padding:4px 8px;border-radius:6px;border:1.5px solid #D1D5DB;font-size:12px;color:#374151;background:#fff;outline:none}' +
+    '.date-form input[type=date]:focus{border-color:#7EBFBB}' +
+    '.date-form button{padding:5px 14px;border-radius:20px;border:1.5px solid #7EBFBB;background:#7EBFBB;color:#fff;font-size:12px;font-weight:700;cursor:pointer}' +
+    '.date-form span{font-size:12px;color:#6B7280}' +
     '</style></head><body>' +
     '<h1>MUSUBU 診断 管理ダッシュボード</h1>' +
     '<p class="meta">集計時刻: ' + nowJST + ' (JST) &nbsp;|&nbsp; <a href="/admin?period=' + period + '" style="color:#7EBFBB">更新</a></p>' +
     '<div class="period-bar"><span>計測期間:</span>' +
     ['today','7d','30d','all'].map(p => {
       const labels = {today:'今日', '7d':'過去7日', '30d':'過去30日', all:'全期間'};
-      return '<a href="/admin?period=' + p + '" class="period-btn' + (period === p ? ' active' : '') + '">' + labels[p] + '</a>';
+      const isActive = period === p;
+      return '<a href="/admin?period=' + p + '" class="period-btn' + (isActive ? ' active' : '') + '">' + labels[p] + '</a>';
     }).join('') +
+    '<form class="date-form" method="GET" action="/admin">' +
+    '<input type="hidden" name="period" value="custom">' +
+    '<input type="date" name="from" value="' + from + '" required>' +
+    '<span>〜</span>' +
+    '<input type="date" name="to" value="' + to + '" required>' +
+    '<button type="submit"' + (period === 'custom' ? ' style="background:#5aa8a4;border-color:#5aa8a4"' : '') + '>適用</button>' +
+    '</form>' +
     '</div>' +
     '<div class="kpi-grid">' + kpiHtml + '</div>' +
     '<section><h2>📊 離脱ファネル</h2>' +
@@ -493,8 +519,10 @@ app.get('/admin', async (req, res) => {
 
   try {
     const period = req.query.period || 'all';
-    const data   = await getAnalyticsData(period);
-    res.send(buildAdminHtml(data, period));
+    const from   = (req.query.from || '').replace(/[^0-9-]/g, '').slice(0, 10);
+    const to     = (req.query.to   || '').replace(/[^0-9-]/g, '').slice(0, 10);
+    const data   = await getAnalyticsData(period, from, to);
+    res.send(buildAdminHtml(data, period, from, to));
   } catch (err) {
     console.error('GET /admin error:', err);
     res.status(500).send('Internal server error');
