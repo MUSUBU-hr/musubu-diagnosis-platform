@@ -237,7 +237,7 @@ app.post('/api/send-result', async (req, res) => {
   }
 
   try {
-    const { name, main_type, sub_type, scores, analysis, advisor_memo } = req.body;
+    const { name, main_type, sub_type, scores, analysis, weapon, environment, motivation, advisor_memo } = req.body;
     if (!name || !main_type) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
@@ -255,9 +255,13 @@ app.post('/api/send-result', async (req, res) => {
              + '<td style="padding:4px 0;font-weight:700;color:#111">' + Number(v).toFixed(1) + ' / 5</td></tr>';
       }).join('');
 
-    const analysisHtml = analysis
-      ? analysis.replace(/\n/g, '<br>')
-      : '（取得できませんでした）';
+    const esc = (s) => s ? s.replace(/\n/g, '<br>') : '—';
+
+    const subItemHtml = (icon, label, text) =>
+      '<div style="border-left:3px solid #7EBFBB;padding:10px 14px;margin-bottom:10px;background:#f8fdfd;border-radius:0 6px 6px 0">'
+      + '<div style="font-size:12px;font-weight:700;color:#5aa8a4;margin-bottom:4px">' + icon + ' ' + label + '</div>'
+      + '<div style="font-size:13px;line-height:1.7;color:#111">' + esc(text) + '</div>'
+      + '</div>';
 
     const memoHtml = advisor_memo
       ? advisor_memo.replace(/\n/g, '<br>')
@@ -269,18 +273,30 @@ app.post('/api/send-result', async (req, res) => {
       '<h1 style="color:#fff;font-size:18px;margin:0">MUSUBU キャリアタイプ診断 結果レポート</h1>',
       '</div>',
       '<div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">',
+
+      // 基本情報
       '<table style="margin-bottom:20px;width:100%">',
       '<tr><td style="padding:4px 12px 4px 0;color:#555;width:100px">氏名</td><td style="font-weight:700">' + name + '</td></tr>',
       '<tr><td style="padding:4px 12px 4px 0;color:#555">診断日</td><td>' + date + '</td></tr>',
       '<tr><td style="padding:4px 12px 4px 0;color:#555">メインタイプ</td><td style="font-weight:700;color:#7EBFBB">' + mainLabel + '</td></tr>',
       '<tr><td style="padding:4px 12px 4px 0;color:#555">サブタイプ</td><td>' + subLabel + '</td></tr>',
       '</table>',
+
+      // タイプ別スコア
       '<h2 style="font-size:14px;border-bottom:2px solid #e5e7eb;padding-bottom:8px;margin-bottom:12px">タイプ別スコア</h2>',
       '<table style="margin-bottom:24px">' + scoresHtml + '</table>',
-      '<h2 style="font-size:14px;border-bottom:2px solid #e5e7eb;padding-bottom:8px;margin-bottom:12px">' + name + 'さんの分析結果</h2>',
-      '<div style="background:#f0fafa;border-left:4px solid #7EBFBB;border-radius:0 6px 6px 0;padding:16px;font-size:13px;line-height:1.8;margin-bottom:24px">' + analysisHtml + '</div>',
-      '<h2 style="font-size:14px;border-bottom:2px solid #e5e7eb;padding-bottom:8px;margin-bottom:12px">キャリアアドバイザー用メモ</h2>',
+
+      // 個別分析
+      '<h2 style="font-size:14px;border-bottom:2px solid #e5e7eb;padding-bottom:8px;margin-bottom:12px">💡 ' + name + 'さんの個別分析</h2>',
+      '<div style="background:#f0fafa;border-left:4px solid #7EBFBB;border-radius:0 6px 6px 0;padding:16px;font-size:13px;line-height:1.8;margin-bottom:16px">' + esc(analysis) + '</div>',
+      subItemHtml('⚔️', 'あなたの武器', weapon),
+      subItemHtml('🌱', 'イキイキする環境', environment),
+      subItemHtml('🔥', 'モチベーションが上がるスイッチ', motivation),
+
+      // CAメモ
+      '<h2 style="font-size:14px;border-bottom:2px solid #e5e7eb;padding-bottom:8px;margin-bottom:12px;margin-top:24px">キャリアアドバイザー用メモ</h2>',
       '<div style="background:#f9fafb;border-radius:6px;padding:16px;font-size:13px;line-height:1.8;white-space:pre-wrap">' + memoHtml + '</div>',
+
       '</div>',
       '</div>',
     ].join('');

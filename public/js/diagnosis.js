@@ -729,6 +729,9 @@ async function analyzeWithLLM(name, mainType, subType, scores, answers) {
               sub_type: subType,
               scores: scores,
               analysis: data.analysis,
+              weapon: data.weapon,
+              environment: data.environment,
+              motivation: data.motivation,
               advisor_memo: data.advisor_memo,
             }),
           });
