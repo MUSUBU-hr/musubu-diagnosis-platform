@@ -717,6 +717,21 @@ async function analyzeWithLLM(name, mainType, subType, scores, answers) {
           progress.advisor_memo = data.advisor_memo;
           saveProgress(progress);
         }
+
+        // 診断結果をメール送信（fire and forget）
+        try {
+          fetch('/api/send-result', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: name,
+              main_type: mainType,
+              sub_type: subType,
+              scores: scores,
+              advisor_memo: data.advisor_memo,
+            }),
+          });
+        } catch (e) { /* silent */ }
       } else {
         memoEl.innerHTML = '<p class="analysis-text" style="color:var(--color-text-sub)">メモを取得できませんでした。</p>';
       }

@@ -5,6 +5,7 @@ const { Firestore, FieldValue } = require('@google-cloud/firestore');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const Anthropic = require('@anthropic-ai/sdk');
+const nodemailer = require('nodemailer');
 
 const TYPE_LABELS = {
   leader:     'リーダータイプ',
@@ -221,6 +222,85 @@ ${name}さんの「モチベーションが上がるスイッチ」（1〜2文�
   } catch (err) {
     console.error('POST /api/analyze error:', err);
     res.json({ analysis: null, weapon: null, environment: null, motivation: null, advisor_memo: null });
+  }
+});
+
+// ========================================
+// POST /api/send-result
+// 診断結果をメール送信
+// ========================================
+app.post('/api/send-result', async (req, res) => {
+  const gmailPass = process.env.GMAIL_APP_PASSWORD;
+  if (!gmailPass) {
+    // シークレット未設定時はスキップ（エラーにしない）
+    return res.json({ ok: true, skipped: true });
+  }
+
+  try {
+    const { name, main_type, sub_type, scores, advisor_memo } = req.body;
+    if (!name || !main_type) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const mainLabel  = TYPE_LABELS[main_type]  || main_type;
+    const subLabel   = TYPE_LABELS[sub_type]   || sub_type;
+    const date       = new Date(Date.now() + 9 * 60 * 60 * 1000)
+                         .toISOString().replace('T', ' ').slice(0, 10);
+
+    const scoresHtml = Object.entries(scores || {})
+      .sort((a, b) => b[1] - a[1])
+      .map(([k, v]) => {
+        const lbl = TYPE_LABELS[k] || k;
+        return '<tr><td style="padding:4px 12px 4px 0;color:#555">' + lbl + '</td>'
+             + '<td style="padding:4px 0;font-weight:700;color:#111">' + Number(v).toFixed(1) + ' / 5</td></tr>';
+      }).join('');
+
+    const memoHtml = advisor_memo
+      ? advisor_memo.replace(/\n/g, '<br>')
+      : '（取得できませんでした）';
+
+    const html = [
+      '<div style="font-family:sans-serif;max-width:600px;margin:0 auto;color:#111">',
+      '<div style="background:#7EBFBB;padding:20px 24px;border-radius:8px 8px 0 0">',
+      '<h1 style="color:#fff;font-size:18px;margin:0">MUSUBU 適職診断 結果レポート</h1>',
+      '</div>',
+      '<div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">',
+      '<table style="margin-bottom:20px;width:100%">',
+      '<tr><td style="padding:4px 12px 4px 0;color:#555;width:100px">氏名</td><td style="font-weight:700">' + name + '</td></tr>',
+      '<tr><td style="padding:4px 12px 4px 0;color:#555">診断日</td><td>' + date + '</td></tr>',
+      '<tr><td style="padding:4px 12px 4px 0;color:#555">メインタイプ</td><td style="font-weight:700;color:#7EBFBB">' + mainLabel + '</td></tr>',
+      '<tr><td style="padding:4px 12px 4px 0;color:#555">サブタイプ</td><td>' + subLabel + '</td></tr>',
+      '</table>',
+      '<h2 style="font-size:14px;border-bottom:2px solid #e5e7eb;padding-bottom:8px;margin-bottom:12px">タイプ別スコア</h2>',
+      '<table style="margin-bottom:24px">' + scoresHtml + '</table>',
+      '<h2 style="font-size:14px;border-bottom:2px solid #e5e7eb;padding-bottom:8px;margin-bottom:12px">キャリアアドバイザー用メモ</h2>',
+      '<div style="background:#f9fafb;border-radius:6px;padding:16px;font-size:13px;line-height:1.8;white-space:pre-wrap">' + memoHtml + '</div>',
+      '</div>',
+      '</div>',
+    ].join('');
+
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: 'musubu.saiyo@gmail.com',
+        pass: gmailPass,
+      },
+    });
+
+    await transporter.sendMail({
+      from: '"MUSUBU診断" <musubu.saiyo@gmail.com>',
+      to: 'musubu.saiyo@gmail.com',
+      subject: '【MUSUBU診断】' + name + 'さんの診断結果（' + mainLabel + '）',
+      html,
+    });
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('POST /api/send-result error:', err);
+    // メール失敗はユーザー体験に影響させない（サイレントに記録のみ）
+    res.json({ ok: true, error: err.message });
   }
 });
 
