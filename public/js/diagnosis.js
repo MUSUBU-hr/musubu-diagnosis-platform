@@ -685,86 +685,34 @@ async function analyzeWithLLM(name, mainType, subType, scores, answers) {
     var motivEl = document.getElementById('result-motivation');
     if (motivEl) motivEl.innerHTML = data.motivation ? '<p class="analysis-item-text">' + escapeHtml(data.motivation) + '</p>' : na;
 
-    // アドバイザーメモ
-    var memoEl = document.getElementById('result-advisor-memo');
-    if (memoEl) {
-      if (data.advisor_memo) {
-        var mainLabel = RESULT_TYPES[mainType] ? RESULT_TYPES[mainType].label : mainType;
-        var subLabel  = RESULT_TYPES[subType]  ? RESULT_TYPES[subType].label  : subType;
-        var date = new Date().toLocaleDateString('ja-JP');
-        var scoreLines = Object.keys(scores)
-          .sort(function (a, b) { return scores[b] - scores[a]; })
-          .map(function (k) {
-            var lbl = RESULT_TYPES[k] ? RESULT_TYPES[k].label : k;
-            return lbl + ': ' + Number(scores[k]).toFixed(1);
-          }).join('\n');
-
-        var fullMemo = [
-          '━━━━━━━━━━━━━━━━━━━━━━━━━━',
-          'MUSUBU キャリアタイプ診断レポート',
-          '━━━━━━━━━━━━━━━━━━━━━━━━━━',
-          '氏名: ' + name,
-          '診断日: ' + date,
-          '',
-          'メインタイプ: ' + mainLabel,
-          'サブタイプ:   ' + subLabel,
-          '',
-          '■ タイプ別スコア',
-          scoreLines,
-          '',
-          '■ キャリアアドバイザーへのメモ',
-          data.advisor_memo,
-          '━━━━━━━━━━━━━━━━━━━━━━━━━━',
-        ].join('\n');
-
-        window._advisorMemoText = fullMemo;
-
-        memoEl.innerHTML = '<div class="advisor-memo-box">' + escapeHtml(data.advisor_memo) + '</div>'
-          + '<button class="btn-copy" id="btn-copy-memo">📋 コピー</button>';
-
-        var copyBtn = document.getElementById('btn-copy-memo');
-        if (copyBtn) {
-          copyBtn.addEventListener('click', function () {
-            navigator.clipboard.writeText(window._advisorMemoText || data.advisor_memo).then(function () {
-              copyBtn.textContent = '✓ コピーしました';
-              copyBtn.classList.add('copied');
-              setTimeout(function () {
-                copyBtn.textContent = '📋 コピー';
-                copyBtn.classList.remove('copied');
-              }, 2000);
-            });
-          });
-        }
-
-        // localStorageに保存
-        var progress = loadProgress();
-        if (progress) {
-          progress.analysis    = data.analysis;
-          progress.advisor_memo = data.advisor_memo;
-          saveProgress(progress);
-        }
-
-        // 診断結果をメール送信（fire and forget）
-        try {
-          fetch('/api/send-result', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name: name,
-              main_type: mainType,
-              sub_type: subType,
-              scores: scores,
-              analysis: data.analysis,
-              weapon: data.weapon,
-              environment: data.environment,
-              motivation: data.motivation,
-              advisor_memo: data.advisor_memo,
-            }),
-          });
-        } catch (e) { /* silent */ }
-      } else {
-        memoEl.innerHTML = '<p class="analysis-text" style="color:var(--color-text-sub)">メモを取得できませんでした。</p>';
+    // アドバイザーメモはDOMに挿入しない（メール送信のみ）
+    if (data.advisor_memo) {
+      // localStorageに保存
+      var progress = loadProgress();
+      if (progress) {
+        progress.analysis     = data.analysis;
+        progress.advisor_memo = data.advisor_memo;
+        saveProgress(progress);
       }
+
+      // 診断結果をメール送信（fire and forget）
+      try {
+        fetch('/api/send-result', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: name,
+            main_type: mainType,
+            sub_type: subType,
+            scores: scores,
+            analysis: data.analysis,
+            weapon: data.weapon,
+            environment: data.environment,
+            motivation: data.motivation,
+            advisor_memo: data.advisor_memo,
+          }),
+        });
+      } catch (e) { /* silent */ }
     }
   } catch (e) {
     var el = document.getElementById('result-analysis');
@@ -899,24 +847,6 @@ async function init() {
       if (progress.analysis) {
         var el = document.getElementById('result-analysis');
         if (el) el.innerHTML = '<p class="analysis-text">' + escapeHtml(progress.analysis) + '</p>';
-      }
-      if (progress.advisor_memo) {
-        var memoEl = document.getElementById('result-advisor-memo');
-        if (memoEl) {
-          window._advisorMemoText = progress.advisor_memo;
-          memoEl.innerHTML = '<div class="advisor-memo-box">' + escapeHtml(progress.advisor_memo) + '</div>'
-            + '<button class="btn-copy" id="btn-copy-memo">📋 コピー</button>';
-          var copyBtn = document.getElementById('btn-copy-memo');
-          if (copyBtn) {
-            copyBtn.addEventListener('click', function () {
-              navigator.clipboard.writeText(window._advisorMemoText).then(function () {
-                copyBtn.textContent = '✓ コピーしました';
-                copyBtn.classList.add('copied');
-                setTimeout(function () { copyBtn.textContent = '📋 コピー'; copyBtn.classList.remove('copied'); }, 2000);
-              });
-            });
-          }
-        }
       }
     }
     showScreen('screen-result');
