@@ -234,16 +234,18 @@ async function apiGetSession(sessionId) {
 // ========================================
 // イベント計測（失敗はサイレントに無視）
 // ========================================
-function trackEvent(eventName) {
+function trackEvent(eventName, question) {
   try {
     var progress = loadProgress();
+    var body = {
+      event: eventName,
+      session_id: progress ? (progress.session_id || '') : '',
+    };
+    if (question !== undefined) body.question = question;
     fetch('/api/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        event: eventName,
-        session_id: progress ? (progress.session_id || '') : '',
-      }),
+      body: JSON.stringify(body),
     });
   } catch (e) { /* サイレントに無視 */ }
 }
@@ -306,11 +308,17 @@ function renderBlock(blockNum) {
     ].join('');
   }).join('');
 
-  // 回答時にカードをハイライト
+  // 回答時にカードをハイライト＋初回回答を計測
   container.querySelectorAll('input[type="radio"]').forEach(function (radio) {
     radio.addEventListener('change', function () {
       const card = radio.closest('.question-card');
-      if (card) card.classList.add('answered');
+      if (card) {
+        if (!card.classList.contains('answered')) {
+          // 初回回答時のみ計測
+          trackEvent('question_answered', parseInt(card.dataset.qid));
+        }
+        card.classList.add('answered');
+      }
     });
   });
 }

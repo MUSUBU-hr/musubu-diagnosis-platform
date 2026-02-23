@@ -232,19 +232,29 @@ const ALLOWED_EVENTS = new Set([
   'page_view', 'diagnosis_start',
   'block_reach_1', 'block_reach_2', 'block_reach_3', 'block_reach_4', 'block_reach_5',
   'questions_complete', 'userinfo_view', 'result_view', 'cta_click',
+  'question_answered',
 ]);
 
 app.post('/api/track', async (req, res) => {
-  const { event } = req.body;
+  const { event, question } = req.body;
   if (!ALLOWED_EVENTS.has(event)) {
     return res.status(400).json({ error: 'Unknown event' });
   }
   try {
     const ref = firestore.collection('analytics').doc('counters');
-    await ref.set(
-      { [event]: FieldValue.increment(1), updated_at: Firestore.Timestamp.now() },
-      { merge: true }
-    );
+    let update = { updated_at: Firestore.Timestamp.now() };
+
+    if (event === 'question_answered') {
+      const q = parseInt(question);
+      if (!q || q < 1 || q > 50) {
+        return res.status(400).json({ error: 'Invalid question number' });
+      }
+      update['q' + q] = FieldValue.increment(1);
+    } else {
+      update[event] = FieldValue.increment(1);
+    }
+
+    await ref.set(update, { merge: true });
     res.json({ ok: true });
   } catch (err) {
     console.error('POST /api/track error:', err);
@@ -278,17 +288,17 @@ function buildAdminHtml(data) {
 
   // ---- ファネル SVG ----
   const steps = [
-    { label: 'ページ表示',           key: 'page_view' },
-    { label: '診断開始',             key: 'diagnosis_start' },
-    { label: 'Q1〜Q10  到達',        key: 'block_reach_1' },
-    { label: 'Q11〜Q20 到達',        key: 'block_reach_2' },
-    { label: 'Q21〜Q30 到達',        key: 'block_reach_3' },
-    { label: 'Q31〜Q40 到達',        key: 'block_reach_4' },
-    { label: 'Q41〜Q50 到達',        key: 'block_reach_5' },
-    { label: '50問完走',             key: 'questions_complete' },
-    { label: '氏名入力画面 到達',    key: 'userinfo_view' },
-    { label: '結果表示',             key: 'result_view' },
-    { label: '面談CTA クリック',     key: 'cta_click' },
+    { label: 'ページ表示',        key: 'page_view' },
+    { label: '診断開始',          key: 'diagnosis_start' },
+    { label: 'Block 1 表示',      key: 'block_reach_1' },
+    { label: 'Block 2 表示',      key: 'block_reach_2' },
+    { label: 'Block 3 表示',      key: 'block_reach_3' },
+    { label: 'Block 4 表示',      key: 'block_reach_4' },
+    { label: 'Block 5 表示',      key: 'block_reach_5' },
+    { label: '50問完走',          key: 'questions_complete' },
+    { label: '氏名入力画面 到達', key: 'userinfo_view' },
+    { label: '結果表示',          key: 'result_view' },
+    { label: '面談CTA クリック',  key: 'cta_click' },
   ];
   const vals = steps.map(s => get(s.key));
   const maxVal = Math.max(...vals, 1);
@@ -317,13 +327,9 @@ function buildAdminHtml(data) {
 
   const funnelSvg = '<svg viewBox="0 0 ' + fSW + ' ' + fSH + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:' + fSW + 'px;display:block">' + funnelRows + '</svg>';
 
-  // ---- Q1〜Q50 ステップ折れ線グラフ SVG ----
-  const bv = [
-    get('block_reach_1'), get('block_reach_2'), get('block_reach_3'),
-    get('block_reach_4'), get('block_reach_5'),
-  ];
-  const finalV  = get('questions_complete');
-  const chartMax = Math.max(get('diagnosis_start'), ...bv, finalV, 1);
+  // ---- Q1〜Q50 個別回答数 折れ線グラフ SVG ----
+  const qVals = Array.from({ length: 50 }, (_, i) => get('q' + (i + 1)));
+  const chartMax = Math.max(...qVals, 1);
 
   const PL = 55, PR = 20, PT = 28, PB = 40;
   const CW = 680, CH = 260;
@@ -333,17 +339,8 @@ function buildAdminHtml(data) {
   const qx = (q) => (PL + ((q - 1) / 49) * PW).toFixed(1);
   const vy = (v) => (PT + (1 - v / chartMax) * PH).toFixed(1);
 
-  // ステップ折れ線（ブロック内フラット → ブロック間で垂直ドロップ）
-  const blocks = [[1,10],[11,20],[21,30],[31,40],[41,50]];
-  const polyPts = [];
-  blocks.forEach(([s, e], i) => {
-    polyPts.push(qx(s) + ',' + vy(bv[i]));
-    polyPts.push(qx(e) + ',' + vy(bv[i]));
-    if (i < blocks.length - 1) {
-      polyPts.push(qx(e) + ',' + vy(bv[i + 1])); // 垂直ドロップ
-    }
-  });
-  polyPts.push(qx(50) + ',' + vy(finalV)); // 最終ドロップ（完走）
+  // 50点の折れ線
+  const polyPts = qVals.map((v, i) => qx(i + 1) + ',' + vy(v));
 
   // Y 軸グリッド & ラベル
   const yTicksHtml = [0, 0.25, 0.5, 0.75, 1.0].map(r => {
@@ -353,9 +350,15 @@ function buildAdminHtml(data) {
            '<text x="' + (PL - 6) + '" y="' + (Number(y) + 4) + '" text-anchor="end" font-size="10" fill="#9CA3AF">' + fmt(v) + '</text>';
   }).join('');
 
-  // X 軸ラベル
+  // X 軸ラベル（Q1, Q10, Q20, Q30, Q40, Q50）
   const xLabelsHtml = [1,10,20,30,40,50].map(q =>
     '<text x="' + qx(q) + '" y="' + (PT + PH + 18) + '" text-anchor="middle" font-size="11" fill="#6B7280">Q' + q + '</text>'
+  ).join('');
+
+  // Block 境界の縦線（薄いガイド線）
+  const blocks = [[1,10],[11,20],[21,30],[31,40],[41,50]];
+  const blockGuideHtml = blocks.slice(0, -1).map(([, e]) =>
+    '<line x1="' + qx(e + 0.5) + '" y1="' + PT + '" x2="' + qx(e + 0.5) + '" y2="' + (PT + PH) + '" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="3,3"/>'
   ).join('');
 
   // Block ラベル（上部）
@@ -364,36 +367,18 @@ function buildAdminHtml(data) {
     return '<text x="' + mx + '" y="' + (PT - 8) + '" text-anchor="middle" font-size="10" fill="#9CA3AF">Block ' + (i + 1) + '</text>';
   }).join('');
 
-  // ブロック間の垂直ドロップ線（点線）
-  const dropLinesHtml = blocks.slice(0, -1).map(([, e], i) => {
-    const x  = qx(e);
-    const y1 = vy(bv[i]);
-    const y2 = vy(bv[i + 1]);
-    const isLarge = bv[i] > 0 && bv[i + 1] / bv[i] < 0.7;
-    return '<line x1="' + x + '" y1="' + y1 + '" x2="' + x + '" y2="' + y2 + '" stroke="' + (isLarge ? '#EF4444' : '#CBD5E1') + '" stroke-width="1.5" stroke-dasharray="3,3"/>';
+  // データポイント（Q10, Q20, Q30, Q40, Q50 のみドット表示）
+  const dotsHtml = [10,20,30,40,50].map(q => {
+    const v = qVals[q - 1];
+    return '<circle cx="' + qx(q) + '" cy="' + vy(v) + '" r="4" fill="#7EBFBB" stroke="#fff" stroke-width="1.5"/>';
   }).join('');
-
-  // 最終ドロップ線（Q50完走）
-  const finalDropHtml = '<line x1="' + qx(50) + '" y1="' + vy(bv[4]) + '" x2="' + qx(50) + '" y2="' + vy(finalV) + '" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="3,3"/>';
-
-  // データポイント（ドット）
-  const dotPts = [];
-  blocks.forEach(([s, e], i) => {
-    dotPts.push({ x: qx(s), y: vy(bv[i]) });
-    dotPts.push({ x: qx(e), y: vy(bv[i]) });
-  });
-  dotPts.push({ x: qx(50), y: vy(finalV) });
-  const dotsHtml = dotPts.map(d =>
-    '<circle cx="' + d.x + '" cy="' + d.y + '" r="4" fill="#7EBFBB" stroke="#fff" stroke-width="1.5"/>'
-  ).join('');
 
   const lineSvg =
     '<svg viewBox="0 0 ' + CW + ' ' + CH + '" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:' + CW + 'px;display:block">' +
-    yTicksHtml +
+    yTicksHtml + blockGuideHtml + blockLabelHtml +
     '<line x1="' + PL + '" y1="' + PT + '" x2="' + PL + '" y2="' + (PT + PH) + '" stroke="#E5E7EB" stroke-width="1"/>' +
     '<line x1="' + PL + '" y1="' + (PT + PH) + '" x2="' + (PL + PW) + '" y2="' + (PT + PH) + '" stroke="#E5E7EB" stroke-width="1"/>' +
-    blockLabelHtml + dropLinesHtml + finalDropHtml +
-    '<polyline points="' + polyPts.join(' ') + '" fill="none" stroke="#7EBFBB" stroke-width="2.5" stroke-linejoin="round"/>' +
+    '<polyline points="' + polyPts.join(' ') + '" fill="none" stroke="#7EBFBB" stroke-width="2" stroke-linejoin="round"/>' +
     dotsHtml + xLabelsHtml +
     '</svg>';
 
@@ -426,11 +411,10 @@ function buildAdminHtml(data) {
     '<span class="legend-dot" style="background:#EF4444"></span>前比 70% 未満（要注意）' +
     '</div>' +
     funnelSvg + '</section>' +
-    '<section><h2>📉 設問別到達数（Q1〜Q50）</h2>' +
-    '<p class="note">10問ブロック単位のステップ表示です。点線の垂直線がブロック間の離脱ポイント（赤＝70%未満の大きな離脱）を示します。</p>' +
+    '<section><h2>📉 設問別回答数（Q1〜Q50）</h2>' +
+    '<p class="note">各設問に最初に回答した人数の推移です。急激に下がっている設問が離脱ポイントです。縦の点線はブロック境界を示します。</p>' +
     '<div class="legend">' +
-    '<span class="legend-dot" style="background:#7EBFBB"></span>到達数' +
-    '<span class="legend-dot" style="background:#EF4444"></span>大きな離脱' +
+    '<span class="legend-dot" style="background:#7EBFBB"></span>回答数' +
     '</div>' +
     lineSvg + '</section>' +
     '</body></html>';
