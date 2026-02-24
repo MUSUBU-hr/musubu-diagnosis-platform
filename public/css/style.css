@@ -965,6 +965,13 @@ body {
   margin-bottom: 20px;
 }
 
+.cta-banner-note {
+  margin-top: 12px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.7;
+}
+
 .cta-banner-btn {
   display: inline-block;
   background: #fff;
