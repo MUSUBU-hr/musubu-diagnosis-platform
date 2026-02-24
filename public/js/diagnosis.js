@@ -685,38 +685,35 @@ async function analyzeWithLLM(name, mainType, subType, scores, answers) {
     var motivEl = document.getElementById('result-motivation');
     if (motivEl) motivEl.innerHTML = data.motivation ? '<p class="analysis-item-text">' + escapeHtml(data.motivation) + '</p>' : na;
 
-    // アドバイザーメモはDOMに挿入しない（メール送信のみ）
-    if (data.advisor_memo) {
-      // localStorageに保存
-      var progress = loadProgress();
-      if (progress) {
-        progress.analysis     = data.analysis;
-        progress.weapon       = data.weapon;
-        progress.environment  = data.environment;
-        progress.motivation   = data.motivation;
-        progress.advisor_memo = data.advisor_memo;
-        saveProgress(progress);
-      }
-
-      // 診断結果をメール送信（fire and forget）
-      try {
-        fetch('/api/send-result', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: name,
-            main_type: mainType,
-            sub_type: subType,
-            scores: scores,
-            analysis: data.analysis,
-            weapon: data.weapon,
-            environment: data.environment,
-            motivation: data.motivation,
-            advisor_memo: data.advisor_memo,
-          }),
-        });
-      } catch (e) { /* silent */ }
+    // localStorageに保存（アドバイザーメモはDOMに挿入しない）
+    var progress = loadProgress();
+    if (progress) {
+      progress.analysis    = data.analysis;
+      progress.weapon      = data.weapon;
+      progress.environment = data.environment;
+      progress.motivation  = data.motivation;
+      if (data.advisor_memo) progress.advisor_memo = data.advisor_memo;
+      saveProgress(progress);
     }
+
+    // 診断結果をメール送信（fire and forget）
+    try {
+      fetch('/api/send-result', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name,
+          main_type: mainType,
+          sub_type: subType,
+          scores: scores,
+          analysis: data.analysis,
+          weapon: data.weapon,
+          environment: data.environment,
+          motivation: data.motivation,
+          advisor_memo: data.advisor_memo || '',
+        }),
+      });
+    } catch (e) { /* silent */ }
   } catch (e) {
     var el = document.getElementById('result-analysis');
     if (el) el.innerHTML = '<p class="analysis-text" style="color:var(--color-text-sub)">分析を取得できませんでした。</p>';
@@ -846,6 +843,13 @@ async function init() {
     // 完走済み（氏名入力済み）→ 結果画面
     if (progress.result_type) {
       renderResult(progress.result_type, progress.result_subtype || null, progress.result_scores || null);
+
+      // 氏名を復元
+      var nameEl = document.getElementById('result-name');
+      if (nameEl) nameEl.textContent = progress.name || '';
+      var nameAnalysisEl = document.getElementById('result-name-analysis');
+      if (nameAnalysisEl) nameAnalysisEl.textContent = progress.name || '';
+
       // 保存済み分析を復元
       var na = '<p class="analysis-item-text" style="color:var(--color-text-sub)">-</p>';
       if (progress.analysis) {
