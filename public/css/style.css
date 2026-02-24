@@ -505,10 +505,14 @@ body {
 
 .ai-title-row {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
   margin-bottom: 14px;
+}
+
+.ai-title-row .result-card-title {
+  align-self: flex-start;
 }
 
 .ai-title-row .result-card-title {
