@@ -1,5 +1,6 @@
 node_modules/
 *.png
+!public/images/*.png
 screenshot.js
 debug.js
 debug2.png
