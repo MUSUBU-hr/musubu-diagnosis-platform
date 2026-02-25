@@ -332,6 +332,20 @@ function renderAllBlocks() {
 }
 
 // ========================================
+// ユーザー向けフィールドの数字除去
+// ========================================
+function sanitizeUserField(text) {
+  if (!text) return text;
+  // 括弧内の数字表記を除去（例: (Q41で4/5)、（Q44・Q45で3点）など）
+  return text
+    .replace(/[（(][^）)]*\d[^）)]*[）)]/g, '')
+    .replace(/Q\d+/g, '')
+    .replace(/\d+\/\d+/g, '')
+    .replace(/\d+点/g, '')
+    .trim();
+}
+
+// ========================================
 // XSSガード
 // ========================================
 function escapeHtml(str) {
@@ -666,24 +680,24 @@ async function analyzeWithLLM(name, mainType, subType, scores, answers) {
     if (!res.ok) return;
     var data = await res.json();
 
-    // AI分析テキスト
+    // AI分析テキスト（数字除去サニタイズ済み）
     var analysisEl = document.getElementById('result-analysis');
     if (analysisEl) {
       if (data.analysis) {
-        analysisEl.innerHTML = '<p class="analysis-text">' + escapeHtml(data.analysis) + '</p>';
+        analysisEl.innerHTML = '<p class="analysis-text">' + escapeHtml(sanitizeUserField(data.analysis)) + '</p>';
       } else {
         analysisEl.innerHTML = '<p class="analysis-text" style="color:var(--color-text-sub)">分析を取得できませんでした。</p>';
       }
     }
 
-    // 武器・環境・モチベーション（個別カード）
+    // 武器・環境・モチベーション（個別カード・数字除去サニタイズ済み）
     var na = '<p class="analysis-item-text" style="color:var(--color-text-sub)">-</p>';
     var weaponEl = document.getElementById('result-weapon');
-    if (weaponEl) weaponEl.innerHTML = data.weapon ? '<p class="analysis-item-text">' + escapeHtml(data.weapon) + '</p>' : na;
+    if (weaponEl) weaponEl.innerHTML = data.weapon ? '<p class="analysis-item-text">' + escapeHtml(sanitizeUserField(data.weapon)) + '</p>' : na;
     var envEl = document.getElementById('result-environment');
-    if (envEl) envEl.innerHTML = data.environment ? '<p class="analysis-item-text">' + escapeHtml(data.environment) + '</p>' : na;
+    if (envEl) envEl.innerHTML = data.environment ? '<p class="analysis-item-text">' + escapeHtml(sanitizeUserField(data.environment)) + '</p>' : na;
     var motivEl = document.getElementById('result-motivation');
-    if (motivEl) motivEl.innerHTML = data.motivation ? '<p class="analysis-item-text">' + escapeHtml(data.motivation) + '</p>' : na;
+    if (motivEl) motivEl.innerHTML = data.motivation ? '<p class="analysis-item-text">' + escapeHtml(sanitizeUserField(data.motivation)) + '</p>' : na;
 
     // localStorageに保存（アドバイザーメモはDOMに挿入しない）
     var progress = loadProgress();
@@ -850,18 +864,18 @@ async function init() {
       var nameAnalysisEl = document.getElementById('result-name-analysis');
       if (nameAnalysisEl) nameAnalysisEl.textContent = progress.name || '';
 
-      // 保存済み分析を復元
+      // 保存済み分析を復元（数字除去サニタイズ済み）
       var na = '<p class="analysis-item-text" style="color:var(--color-text-sub)">-</p>';
       if (progress.analysis) {
         var el = document.getElementById('result-analysis');
-        if (el) el.innerHTML = '<p class="analysis-text">' + escapeHtml(progress.analysis) + '</p>';
+        if (el) el.innerHTML = '<p class="analysis-text">' + escapeHtml(sanitizeUserField(progress.analysis)) + '</p>';
       }
       var weaponEl = document.getElementById('result-weapon');
-      if (weaponEl) weaponEl.innerHTML = progress.weapon ? '<p class="analysis-item-text">' + escapeHtml(progress.weapon) + '</p>' : na;
+      if (weaponEl) weaponEl.innerHTML = progress.weapon ? '<p class="analysis-item-text">' + escapeHtml(sanitizeUserField(progress.weapon)) + '</p>' : na;
       var envEl = document.getElementById('result-environment');
-      if (envEl) envEl.innerHTML = progress.environment ? '<p class="analysis-item-text">' + escapeHtml(progress.environment) + '</p>' : na;
+      if (envEl) envEl.innerHTML = progress.environment ? '<p class="analysis-item-text">' + escapeHtml(sanitizeUserField(progress.environment)) + '</p>' : na;
       var motivEl = document.getElementById('result-motivation');
-      if (motivEl) motivEl.innerHTML = progress.motivation ? '<p class="analysis-item-text">' + escapeHtml(progress.motivation) + '</p>' : na;
+      if (motivEl) motivEl.innerHTML = progress.motivation ? '<p class="analysis-item-text">' + escapeHtml(sanitizeUserField(progress.motivation)) + '</p>' : na;
     }
     showScreen('screen-result');
     return;
