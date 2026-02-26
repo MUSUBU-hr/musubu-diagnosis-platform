@@ -262,7 +262,7 @@ app.post('/api/send-result', async (req, res) => {
   }
 
   try {
-    const { name, main_type, sub_type, scores, analysis, weapon, environment, motivation, advisor_memo } = req.body;
+    const { name, main_type, sub_type, scores, analysis, weapon, environment, motivation, advisor_memo, traffic_source } = req.body;
     if (!name || !main_type) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
@@ -271,6 +271,28 @@ app.post('/api/send-result', async (req, res) => {
     const subLabel   = TYPE_LABELS[sub_type]   || sub_type;
     const date       = new Date(Date.now() + 9 * 60 * 60 * 1000)
                          .toISOString().replace('T', ' ').slice(0, 10);
+
+    // 流入元の件名表示名マッピング（utm_sourceの値 → 件名表示名）
+    const SOURCE_LABELS = {
+      'line':        'LINE',
+      'lineworks':   'LINE WORKS',
+      'instagram':   'Instagram',
+      'twitter':     'Twitter/X',
+      'x':           'Twitter/X',
+      'facebook':    'Facebook',
+      'email':       'メール',
+      'advisor':     'アドバイザー紹介',
+      'dm':          'DM',
+      'qr':          'QRコード',
+      'myrec':       'マイリク',
+    };
+    const utmSource = traffic_source && traffic_source.utm_source
+      ? traffic_source.utm_source.toLowerCase() : null;
+    const sourceDisplay = utmSource
+      ? (SOURCE_LABELS[utmSource] || traffic_source.utm_source) : null;
+    const subjectPrefix = sourceDisplay
+      ? '【MUSUBU診断(' + sourceDisplay + ')】'
+      : '【MUSUBU診断】';
 
     const scoresHtml = Object.entries(scores || {})
       .sort((a, b) => b[1] - a[1])
@@ -318,6 +340,22 @@ app.post('/api/send-result', async (req, res) => {
       subItemHtml('🌱', 'イキイキする環境', environment),
       subItemHtml('🔥', 'モチベーションが上がるスイッチ', motivation),
 
+      // 流入経路
+      (() => {
+        if (!traffic_source) return '';
+        const src = traffic_source;
+        const sourceLabel = src.utm_source || (src.referrer ? new URL(src.referrer).hostname : '直接アクセス');
+        const rows = [
+          src.utm_source   ? '<tr><td style="padding:3px 12px 3px 0;color:#555;width:120px">流入元(source)</td><td>' + src.utm_source + '</td></tr>' : '',
+          src.utm_medium   ? '<tr><td style="padding:3px 12px 3px 0;color:#555">メディア(medium)</td><td>' + src.utm_medium + '</td></tr>' : '',
+          src.utm_campaign ? '<tr><td style="padding:3px 12px 3px 0;color:#555">キャンペーン</td><td>' + src.utm_campaign + '</td></tr>' : '',
+          src.utm_content  ? '<tr><td style="padding:3px 12px 3px 0;color:#555">コンテンツ</td><td>' + src.utm_content + '</td></tr>' : '',
+          src.referrer     ? '<tr><td style="padding:3px 12px 3px 0;color:#555">参照元URL</td><td style="font-size:11px;word-break:break-all">' + src.referrer + '</td></tr>' : '',
+        ].filter(Boolean).join('');
+        return '<h2 style="font-size:14px;border-bottom:2px solid #e5e7eb;padding-bottom:8px;margin-bottom:12px;margin-top:24px">📍 流入経路</h2>'
+          + '<table style="margin-bottom:20px;font-size:13px">' + rows + '</table>';
+      })(),
+
       // CAメモ
       '<h2 style="font-size:14px;border-bottom:2px solid #e5e7eb;padding-bottom:8px;margin-bottom:12px;margin-top:24px">キャリアアドバイザー用メモ</h2>',
       '<div style="background:#f9fafb;border-radius:6px;padding:16px;font-size:13px;line-height:1.8;white-space:pre-wrap">' + memoHtml + '</div>',
@@ -339,7 +377,7 @@ app.post('/api/send-result', async (req, res) => {
     await transporter.sendMail({
       from: '"MUSUBU診断" <musubu.saiyo@gmail.com>',
       to: 'musubu.saiyo@gmail.com',
-      subject: '【MUSUBU診断】' + name + 'さんの診断結果（' + mainLabel + '）',
+      subject: subjectPrefix + name + 'さんの診断結果（' + mainLabel + '）',
       html,
     });
 

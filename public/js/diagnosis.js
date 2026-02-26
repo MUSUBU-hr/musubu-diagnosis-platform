@@ -232,6 +232,43 @@ async function apiGetSession(sessionId) {
 }
 
 // ========================================
+// UTMパラメータ・流入元の取得と保存
+// ========================================
+function captureTrafficSource() {
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var source = {
+      utm_source:   params.get('utm_source')   || '',
+      utm_medium:   params.get('utm_medium')   || '',
+      utm_campaign: params.get('utm_campaign') || '',
+      utm_content:  params.get('utm_content')  || '',
+      referrer:     document.referrer          || '',
+    };
+    // UTMまたは参照元がある場合のみ保存
+    var hasData = Object.values(source).some(function(v) { return v !== ''; });
+    if (hasData) {
+      var progress = loadProgress();
+      if (progress) {
+        progress.traffic_source = source;
+        saveProgress(progress);
+      } else {
+        // 診断前でもlocalStorageに一時保存
+        try { localStorage.setItem('musubu_traffic', JSON.stringify(source)); } catch(e) {}
+      }
+    }
+  } catch (e) { /* サイレントに無視 */ }
+}
+
+function getTrafficSource() {
+  try {
+    var progress = loadProgress();
+    if (progress && progress.traffic_source) return progress.traffic_source;
+    var raw = localStorage.getItem('musubu_traffic');
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+
+// ========================================
 // イベント計測（失敗はサイレントに無視）
 // ========================================
 function trackEvent(eventName, question) {
@@ -720,6 +757,7 @@ async function analyzeWithLLM(name, mainType, subType, scores, answers) {
 
     // 診断結果をメール送信（fire and forget）
     try {
+      var currentProgress = loadProgress();
       fetch('/api/send-result', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -733,6 +771,7 @@ async function analyzeWithLLM(name, mainType, subType, scores, answers) {
           environment: data.environment,
           motivation: data.motivation,
           advisor_memo: data.advisor_memo || '',
+          traffic_source: currentProgress ? (currentProgress.traffic_source || null) : null,
         }),
       });
     } catch (e) { /* silent */ }
@@ -814,10 +853,12 @@ async function startDiagnosis() {
   // APIでセッションを作成し、session_idを取得（失敗時はローカルUUIDを使用）
   var apiSessionId = await apiCreateSession();
 
+  var trafficSource = getTrafficSource();
   var progress = {
-    session_id: apiSessionId || generateUUID(),
-    max_block:  1,
-    completed:  false,
+    session_id:     apiSessionId || generateUUID(),
+    max_block:      1,
+    completed:      false,
+    traffic_source: trafficSource || null,
   };
   saveProgress(progress);
   renderAllBlocks();
@@ -844,6 +885,7 @@ function restartDiagnosis() {
 // 初期化
 // ========================================
 async function init() {
+  captureTrafficSource();
   trackEvent('page_view');
   var progress = loadProgress();
 
