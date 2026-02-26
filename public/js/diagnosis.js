@@ -248,6 +248,14 @@ function trackEvent(eventName, question) {
       body: JSON.stringify(body),
     });
   } catch (e) { /* サイレントに無視 */ }
+
+  // GA4 via GTM dataLayer
+  try {
+    window.dataLayer = window.dataLayer || [];
+    var dlEvent = { event: eventName };
+    if (question !== undefined) dlEvent.question_number = question;
+    window.dataLayer.push(dlEvent);
+  } catch (e) { /* サイレントに無視 */ }
 }
 
 // ========================================
