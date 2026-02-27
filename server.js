@@ -285,6 +285,7 @@ app.post('/api/send-result', async (req, res) => {
       'dm':          'DM',
       'qr':          'QRコード',
       'myrec':       'マイリク',
+      'interviewed': '既存CS',
     };
     const utmSource = traffic_source && traffic_source.utm_source
       ? traffic_source.utm_source.toLowerCase() : null;
